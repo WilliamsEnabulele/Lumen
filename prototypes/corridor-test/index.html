@@ -1,0 +1,1000 @@
+<title>Lumen Corridor Test</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Serif:ital,wght@0,400;0,500;1,400&display=swap">
+<style>
+  :root {
+    --ground: #f5f7f9;
+    --surface: #ffffff;
+    --surface-2: #eef1f5;
+    --ink: #1a2028;
+    --ink-muted: #5c6874;
+    --ink-faint: #8b97a4;
+    --border: #dde3e9;
+    --border-strong: #c3cdd7;
+    --tutor: #b06d22;
+    --tutor-bg: #fbf1e4;
+    --student: #23807f;
+    --student-bg: #e2f1f0;
+    --critical: #bf423a;
+    --critical-bg: #fbe9e7;
+    --ok: #3f7d4e;
+
+    --sans: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+    --mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+    --serif: "IBM Plex Serif", Georgia, serif;
+
+    --r: 6px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground: #14181d;
+      --surface: #1c2229;
+      --surface-2: #232b33;
+      --ink: #e4e9ef;
+      --ink-muted: #94a1af;
+      --ink-faint: #6d7a88;
+      --border: #2b333c;
+      --border-strong: #3c4650;
+      --tutor: #e0a05a;
+      --tutor-bg: #2e2419;
+      --student: #4fb5b3;
+      --student-bg: #16302f;
+      --critical: #e2716a;
+      --critical-bg: #331d1b;
+      --ok: #6fb37f;
+    }
+  }
+  :root[data-theme="dark"] {
+    --ground: #14181d;
+    --surface: #1c2229;
+    --surface-2: #232b33;
+    --ink: #e4e9ef;
+    --ink-muted: #94a1af;
+    --ink-faint: #6d7a88;
+    --border: #2b333c;
+    --border-strong: #3c4650;
+    --tutor: #e0a05a;
+    --tutor-bg: #2e2419;
+    --student: #4fb5b3;
+    --student-bg: #16302f;
+    --critical: #e2716a;
+    --critical-bg: #331d1b;
+    --ok: #6fb37f;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    background: var(--ground);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 15px;
+    line-height: 1.5;
+    margin: 0;
+  }
+  .wrap { max-width: 1180px; margin: 0 auto; padding-inline: 16px; padding-block: 0 48px; }
+
+  /* ---------- header ---------- */
+  .topbar {
+    position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20;
+    background: var(--ground);
+    background: color-mix(in srgb, var(--ground) 92%, transparent);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--border);
+  }
+  .topbar-in {
+    max-width: 1180px; margin: 0 auto; padding-inline: 16px; padding-block: 12px;
+    display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+  }
+  .brand { display: flex; align-items: baseline; gap: 10px; margin-right: auto; }
+  .brand b { font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+  .eyebrow {
+    font-family: var(--mono); font-size: 10.5px; text-transform: uppercase;
+    letter-spacing: 0.14em; color: var(--ink-faint);
+  }
+  .statepill {
+    font-family: var(--mono); font-size: 11.5px; font-weight: 500;
+    letter-spacing: 0.08em; padding: 5px 10px; border-radius: 100px;
+    border: 1px solid var(--border-strong); color: var(--ink-muted);
+    background: var(--surface); white-space: nowrap;
+  }
+  .statepill[data-s="TEACHING"] { color: var(--tutor); border-color: var(--tutor); background: var(--tutor-bg); }
+  .statepill[data-s="LISTENING"], .statepill[data-s="CHECKING_UNDERSTANDING"] { color: var(--student); border-color: var(--student); background: var(--student-bg); }
+  .statepill[data-s="ANSWERING"], .statepill[data-s="ADAPTING"] { color: var(--student); border-color: var(--student); background: var(--student-bg); }
+
+  /* ---------- controls ---------- */
+  .controls {
+    display: flex; gap: 8px; align-items: center; flex-wrap: wrap;
+    padding-block: 16px;
+  }
+  button {
+    font-family: var(--sans); font-size: 13.5px; font-weight: 500;
+    padding: 8px 14px; border-radius: var(--r); cursor: pointer;
+    border: 1px solid var(--border-strong); background: var(--surface); color: var(--ink);
+  }
+  button:hover:not(:disabled) { border-color: var(--ink-faint); }
+  button:disabled { opacity: 0.4; cursor: not-allowed; }
+  button:focus-visible { outline: 2px solid var(--student); outline-offset: 2px; }
+  button.primary { background: var(--ink); color: var(--ground); border-color: var(--ink); }
+  button.armed { background: var(--student); border-color: var(--student); color: #fff; }
+  .miclamp {
+    display: inline-flex; align-items: center; gap: 7px; font-size: 12.5px;
+    color: var(--ink-muted); margin-left: auto;
+  }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--ink-faint); flex: none; }
+  .dot.live { background: var(--student); }
+  .dot.hot { background: var(--critical); }
+  .level {
+    width: 76px; height: 5px; border-radius: 3px; background: var(--surface-2);
+    overflow: hidden; border: 1px solid var(--border);
+  }
+  .level i { display: block; height: 100%; width: 0%; background: var(--student); }
+
+  /* ---------- metrics ---------- */
+  .metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+  @media (max-width: 760px) { .metrics { grid-template-columns: repeat(2, 1fr); } }
+  .tile {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--r); padding: 12px 13px;
+  }
+  .tile .k {
+    font-family: var(--mono); font-size: 10px; text-transform: uppercase;
+    letter-spacing: 0.1em; color: var(--ink-faint); display: block; margin-bottom: 6px;
+  }
+  .tile .v {
+    font-family: var(--mono); font-size: 25px; font-weight: 500;
+    font-variant-numeric: tabular-nums; letter-spacing: -0.02em; line-height: 1.1;
+  }
+  .tile .v small { font-size: 13px; color: var(--ink-faint); font-weight: 400; }
+  .tile .sub { font-family: var(--mono); font-size: 11px; color: var(--ink-faint); margin-top: 5px; font-variant-numeric: tabular-nums; }
+  .tile.budget-ok .v { color: var(--ok); }
+  .tile.budget-blown .v { color: var(--critical); }
+
+  /* ---------- main grid ---------- */
+  .grid { display: grid; grid-template-columns: 1.55fr 1fr; gap: 16px; margin-top: 16px; align-items: start; }
+  @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } }
+
+  .panel { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); }
+  .panel-h {
+    padding: 10px 14px; border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 10px;
+    font-family: var(--mono); font-size: 10.5px; text-transform: uppercase;
+    letter-spacing: 0.11em; color: var(--ink-faint);
+  }
+  .panel-b { padding: 16px 18px; }
+
+  /* progress rail */
+  .rail { display: flex; gap: 4px; padding: 12px 14px; border-bottom: 1px solid var(--border); flex-wrap: wrap; }
+  .rail i {
+    max-width: 26px; height: 5px; border-radius: 2px; flex: 1 1 14px;
+    background: var(--border-strong); transition: background 0.15s;
+  }
+  .rail i[data-k="check"] { background: var(--border-strong); opacity: 0.55; }
+  .rail i.done { background: var(--ink-faint); }
+  .rail i.here { background: var(--tutor); }
+
+  .nodemeta {
+    font-family: var(--mono); font-size: 11px; color: var(--ink-faint);
+    display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 12px;
+  }
+  .prose {
+    font-family: var(--serif); font-size: 19px; line-height: 1.62; margin: 0;
+    text-wrap: pretty;
+  }
+  .prose .spoken { color: var(--ink-faint); }
+  .prose .cursor { display: inline-block; width: 0; height: 0.95em; vertical-align: -0.12em;
+    border-left: 2px solid var(--tutor); margin-left: 1px; animation: blink 1s steps(2) infinite; }
+  @keyframes blink { 50% { opacity: 0; } }
+  @media (prefers-reduced-motion: reduce) { .prose .cursor { animation: none; } }
+
+  .code {
+    margin-top: 16px; background: var(--surface-2); border: 1px solid var(--border);
+    border-radius: var(--r); overflow-x: auto;
+  }
+  .code figcaption {
+    font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--ink-faint);
+    padding: 9px 14px; border-bottom: 1px solid var(--border);
+  }
+  .code pre { margin: 0; padding: 14px; font-family: var(--mono); font-size: 13.5px; line-height: 1.65; }
+
+  .checkbox-q { margin-top: 16px; display: flex; gap: 8px; flex-wrap: wrap; }
+  .checkbox-q button { font-family: var(--mono); }
+
+  /* answer / detour */
+  .detour {
+    margin-top: 16px; border-left: 3px solid var(--student);
+    background: var(--student-bg); border-radius: 0 var(--r) var(--r) 0; padding: 13px 15px;
+  }
+  .detour .lbl {
+    font-family: var(--mono); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--student); display: block; margin-bottom: 6px;
+  }
+  .detour p { margin: 0; font-family: var(--serif); font-size: 16px; line-height: 1.55; }
+  .cite {
+    display: inline-block; margin-top: 9px; font-family: var(--mono); font-size: 10.5px;
+    color: var(--ink-muted); border: 1px solid var(--border-strong);
+    border-radius: 3px; padding: 2px 6px; background: var(--surface);
+  }
+  .cite.oos { color: var(--critical); border-color: var(--critical); }
+
+  .askrow { display: flex; gap: 8px; margin-top: 14px; }
+  .askrow input {
+    flex: 1; min-width: 0; font-family: var(--sans); font-size: 14px; padding: 8px 11px;
+    border: 1px solid var(--border-strong); border-radius: var(--r);
+    background: var(--surface); color: var(--ink);
+  }
+  .askrow input:focus-visible { outline: 2px solid var(--student); outline-offset: 1px; }
+
+  /* pointer readout */
+  .kv { display: grid; grid-template-columns: auto 1fr; gap: 7px 14px; font-family: var(--mono); font-size: 12.5px; }
+  .kv dt { color: var(--ink-faint); }
+  .kv dd { margin: 0; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+  .kv dd.hl { color: var(--tutor); }
+
+  /* log */
+  .log { max-height: 340px; overflow-y: auto; font-family: var(--mono); font-size: 11.5px; }
+  .log-row {
+    display: grid; grid-template-columns: 58px 1fr; gap: 10px;
+    padding: 6px 14px; border-bottom: 1px solid var(--border);
+  }
+  .log-row:last-child { border-bottom: 0; }
+  .log-row time { color: var(--ink-faint); font-variant-numeric: tabular-nums; }
+  .log-row.ev-barge span { color: var(--student); }
+  .log-row.ev-resume span { color: var(--tutor); }
+  .log-row.ev-false span { color: var(--critical); }
+  .log-empty { padding: 16px 14px; color: var(--ink-faint); font-family: var(--sans); font-size: 13px; }
+
+  .note {
+    margin-top: 24px; border: 1px solid var(--border); border-radius: var(--r);
+    background: var(--surface); padding: 16px 18px;
+  }
+  .note h2 { font-size: 13px; margin: 0 0 10px; letter-spacing: -0.005em; }
+  .note ul { margin: 0; padding-left: 18px; }
+  .note li { margin-bottom: 6px; color: var(--ink-muted); font-size: 13.5px; line-height: 1.55; }
+  .note li b { color: var(--ink); font-weight: 600; }
+  .note + .note { margin-top: 12px; }
+  code.inl { font-family: var(--mono); font-size: 0.92em; background: var(--surface-2); padding: 1px 5px; border-radius: 3px; }
+</style>
+
+<header class="topbar">
+  <div class="topbar-in">
+    <div class="brand">
+      <b>Lumen</b>
+      <span class="eyebrow">Corridor test · lesson 1 of 1</span>
+    </div>
+    <span class="statepill" id="state" data-s="IDLE">IDLE</span>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="controls">
+    <button class="primary" id="btn-start">Start lesson</button>
+    <button id="btn-pause" disabled>Pause</button>
+    <button id="btn-barge" disabled title="Hold-to-talk fallback if the mic is unavailable (or press space)">Interrupt</button>
+    <button id="btn-reset">Reset run</button>
+    <span class="miclamp">
+      <span class="dot" id="mic-dot"></span>
+      <span id="mic-label">mic idle</span>
+      <span class="level"><i id="mic-level"></i></span>
+    </span>
+  </div>
+
+  <div class="metrics">
+    <div class="tile" id="tile-latency">
+      <span class="k">Barge-in → silence</span>
+      <span class="v" id="m-latency">—</span>
+      <div class="sub" id="m-latency-sub">budget 300 ms</div>
+    </div>
+    <div class="tile">
+      <span class="k">Interruptions</span>
+      <span class="v" id="m-barges">0</span>
+      <div class="sub" id="m-barges-sub">the number that matters</div>
+    </div>
+    <div class="tile">
+      <span class="k">Resumed mid-utterance</span>
+      <span class="v" id="m-resumes">—</span>
+      <div class="sub" id="m-resumes-sub">rather than at a node start</div>
+    </div>
+    <div class="tile">
+      <span class="k">False positives</span>
+      <span class="v" id="m-false">0</span>
+      <div class="sub">stopped for nothing</div>
+    </div>
+  </div>
+
+  <div class="grid">
+    <main class="panel">
+      <div class="panel-h">
+        <span>Lesson canvas</span>
+        <span style="margin-left:auto;text-transform:none;letter-spacing:0" id="lesson-title"></span>
+      </div>
+      <div class="rail" id="rail"></div>
+      <div class="panel-b">
+        <div class="nodemeta" id="nodemeta"></div>
+        <p class="prose" id="prose"></p>
+        <figure class="code" id="codefig" hidden>
+          <figcaption id="codecap"></figcaption>
+          <pre id="codebody"></pre>
+        </figure>
+        <div class="checkbox-q" id="checkopts" hidden></div>
+        <div class="detour" id="detour" hidden>
+          <span class="lbl" id="detour-lbl">Answer</span>
+          <p id="detour-body"></p>
+          <span class="cite" id="detour-cite"></span>
+        </div>
+        <div class="askrow">
+          <input id="ask" placeholder="Or type the interruption — &ldquo;why is that slow?&rdquo;, &ldquo;say that again&rdquo;, &ldquo;slow down&rdquo;" autocomplete="off">
+          <button id="btn-ask">Ask</button>
+        </div>
+      </div>
+    </main>
+
+    <aside style="display:grid;gap:16px">
+      <section class="panel">
+        <div class="panel-h">Resume pointer</div>
+        <div class="panel-b">
+          <dl class="kv">
+            <dt>lesson</dt><dd id="p-lesson">—</dd>
+            <dt>node</dt><dd class="hl" id="p-node">—</dd>
+            <dt>offset</dt><dd id="p-offset">—</dd>
+            <dt>canvas</dt><dd id="p-canvas">—</dd>
+            <dt>saved</dt><dd id="p-saved">—</dd>
+          </dl>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-h">Event log</div>
+        <div class="log" id="log"><div class="log-empty">Nothing yet. Start the lesson, then interrupt it.</div></div>
+      </section>
+    </aside>
+  </div>
+
+  <div class="note">
+    <h2>What this rig is for</h2>
+    <ul>
+      <li><b>It tests one assumption:</b> that a script plus a resume pointer feels like <i>being taught</i>, rather than like a synthesised voice reading at you with a search box bolted on. Interrupt it. Then notice whether you want to interrupt it again — that, not the latency, is the result.</li>
+      <li><b>The resume pointer is three-dimensional here</b> — script node, character offset <i>inside</i> the utterance, and canvas state — because restoring the speech but not the diagram is still a wrong resume. Watch the pointer panel while you interrupt.</li>
+      <li><b>False positives are handled, not avoided.</b> Stopping instantly on any voice means sometimes stopping for a cough. If nothing intelligible arrives within 1.2 s it resumes mid-utterance from the stored offset, and logs it.</li>
+      <li><b>Answers cite their source node.</b> Nothing is generated: every answer is matched from this lesson's own content, and anything unmatched is declared out of scope rather than guessed at.</li>
+    </ul>
+  </div>
+
+  <div class="note">
+    <h2>What it deliberately isn't</h2>
+    <ul>
+      <li><b>No LLM and no realtime voice provider.</b> It uses the browser's own <code class="inl">speechSynthesis</code> and <code class="inl">SpeechRecognition</code>, so the voice is worse than the product's would be and the Q&amp;A is keyword-matched. Both are the point: if the experience works on <i>this</i>, the assumption survives; a better voice can only help it.</li>
+      <li><b>The latency number is partial.</b> It measures detection → synthesis cancelled, which excludes the OS audio buffer drain that a real client would also have to cap. Treat it as a floor, not the NFR-1 measurement.</li>
+      <li><b>One 5-minute lesson,</b> hand-written, not ingested. The dimensioning doc asks for 15; this is the short cut of it.</li>
+      <li><b>Chrome and Edge only</b> for the speech-recognition path. Everywhere else, type the interruption or press space — everything except live ASR still works.</li>
+    </ul>
+  </div>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  /* ============================ the lesson ============================ */
+  var LESSON = {
+    id: "les_loops_01",
+    course: "Introduction to Programming",
+    title: "Loops, and the cost of nesting",
+    nodes: [
+      { id: "n01", kind: "speech",
+        text: "Let's talk about loops. Not what they look like — you have seen the syntax — but what they actually cost you when you run them." },
+      { id: "n02", kind: "speech",
+        text: "A loop is a promise to do the same work more than once. The interesting question is never what the work is. It is how many times the promise gets kept." },
+      { id: "n03", kind: "code", caption: "One loop, five turns", code: "for i in range(5):\n    print(i)",
+        text: "Here is the simplest case. The body of this loop runs five times, printing one number each time. Five turns, five lines of output." },
+      { id: "n04", kind: "speech",
+        text: "If you change five to a thousand, the body runs a thousand times. The work grows exactly as fast as the number does. Double the number, double the work. That is a straight line." },
+      { id: "n05", kind: "check", text: "Quick check. If that range said two hundred instead of five, how many times does the print run?",
+        options: ["5 times", "200 times", "Depends on the body"], correct: 1,
+        onWrong: "n04",
+        praise: "Right — two hundred. One turn per number, no surprises." },
+      { id: "n06", kind: "speech",
+        text: "Now here is where it stops being a straight line. Watch what happens when one loop goes inside another." },
+      { id: "n07", kind: "code", caption: "A loop inside a loop", code: "for i in range(10):\n    for j in range(10):\n        print(i, j)",
+        text: "The outer loop takes ten turns. But for every single one of those turns, the inner loop runs all the way through — ten more turns of its own." },
+      { id: "n08", kind: "speech",
+        text: "So the counts do not add. They multiply. Ten outer turns times ten inner turns is one hundred printed lines, from two lines of code that both say ten." },
+      { id: "n09", kind: "check", text: "So if both of those said one thousand instead of ten, how many lines come out?",
+        options: ["Two thousand", "One million", "A thousand"], correct: 1,
+        onWrong: "n08",
+        praise: "One million. Two innocent-looking thousands, and a million turns." },
+      { id: "n10", kind: "speech",
+        text: "This is why nesting is the thing to look for when something is slow. The loop that is killing you is almost never the one you are reading. It is the one above it." },
+      { id: "n11", kind: "code", caption: "The same shape, at scale", code: "for row in rows:        # 1,000 rows\n    for other in rows:  # x 1,000 again\n        compare(row, other)",
+        text: "This is that same shape, wearing a business suit. A thousand rows compared against a thousand rows is a million comparisons — and nobody wrote the number a million anywhere." },
+      { id: "n12", kind: "speech",
+        text: "So when you read code looking for the slow part, do not count lines. Count how deep the nesting goes, and multiply. That one habit will find the problem more often than a profiler will." },
+      { id: "n13", kind: "speech",
+        text: "That is the whole idea. A single loop grows in a straight line. Nest one inside another and it grows by multiplication — and multiplication gets away from you fast." }
+    ]
+  };
+
+  /* Answers are matched from the lesson's own content and cite the node they came from.
+     Nothing here is generated; an unmatched question is declared out of scope. */
+  var ANSWERS = [
+    { keys: ["why", "multiply", "multiplication", "not add", "add"], src: "n08",
+      text: "Because the inner loop restarts completely on every turn of the outer one. It does not continue from where it was — it runs its full course again. Ten outer turns each containing ten inner turns is ten times ten, not ten plus ten." },
+    { keys: ["nest", "nested", "inside", "inner", "outer"], src: "n07",
+      text: "Nesting means putting one loop inside the body of another. The outer loop takes its turns, and every single one of those turns runs the entire inner loop from the start." },
+    { keys: ["slow", "performance", "fast", "speed", "cost", "expensive"], src: "n10",
+      text: "The nesting depth is what to look for. A single loop grows in a straight line with its input, so it is rarely the problem. Two nested loops grow by multiplication, and that is where the time goes." },
+    { keys: ["range", "index", "i ", "what is i", "variable", "counter"], src: "n03",
+      text: "The i is just the counter — it holds which turn you are on. With range of five it takes the values zero through four, one per turn of the loop." },
+    { keys: ["million", "thousand", "1000", "big", "scale"], src: "n11",
+      text: "A thousand rows compared against a thousand rows is a million comparisons. That is the point of the example: nobody wrote the number a million anywhere, and yet there it is." },
+    { keys: ["three", "third", "triple", "deeper", "more loops"], src: "n12",
+      text: "A third level multiplies again. A thousand cubed is a billion turns — which is why counting nesting depth and multiplying is the habit worth having." },
+    { keys: ["example", "real", "practice", "use"], src: "n11",
+      text: "The row comparison is the realistic one — checking every record against every other record. It looks harmless in code, and it is the shape that produces a million operations." }
+  ];
+
+  /* ============================ state ============================ */
+  var STATES = { IDLE: "IDLE", LOADING: "LOADING_LESSON", TEACHING: "TEACHING",
+                 LISTENING: "LISTENING", ANSWERING: "ANSWERING",
+                 CHECKING: "CHECKING_UNDERSTANDING", ADAPTING: "ADAPTING",
+                 PAUSED: "PAUSED", DONE: "LESSON_COMPLETE" };
+
+  var S = {
+    state: STATES.IDLE,
+    idx: 0,
+    offset: 0,          // character offset inside the current utterance
+    canvas: "none",     // canvas state, part of the pointer
+    returnTo: null,     // {idx, offset} captured at barge-in
+    utterance: null,
+    speaking: false,
+    rate: 1,
+    t0: 0,
+    stats: { barges: 0, falsePos: 0, midResume: 0, resumesTotal: 0, lat: [] }
+  };
+
+  var el = function (id) { return document.getElementById(id); };
+  var LOGN = 0;
+
+  /* ============================ persistence (best effort) ============================ */
+  function savePointer() {
+    var p = { lesson: LESSON.id, node: node().id, offset: S.offset, canvas: S.canvas, at: Date.now() };
+    try { localStorage.setItem("lumen.pointer", JSON.stringify(p)); } catch (e) { /* private mode */ }
+    el("p-saved").textContent = new Date(p.at).toLocaleTimeString();
+    return p;
+  }
+  function loadPointer() {
+    try {
+      var raw = localStorage.getItem("lumen.pointer");
+      if (!raw) return null;
+      var p = JSON.parse(raw);
+      return (p && p.lesson === LESSON.id) ? p : null;
+    } catch (e) { return null; }
+  }
+
+  /* ============================ rendering ============================ */
+  function node() { return LESSON.nodes[S.idx]; }
+
+  function setState(s) {
+    S.state = s;
+    var pill = el("state");
+    pill.textContent = s;
+    pill.dataset.s = s;
+  }
+
+  function renderRail() {
+    var r = el("rail");
+    r.textContent = "";
+    LESSON.nodes.forEach(function (n, i) {
+      var i2 = document.createElement("i");
+      i2.dataset.k = n.kind;
+      if (i < S.idx) i2.className = "done";
+      if (i === S.idx) i2.className = "here";
+      i2.title = n.id + " · " + n.kind;
+      r.appendChild(i2);
+    });
+  }
+
+  function renderNode(spokenChars) {
+    var n = node();
+    el("lesson-title").textContent = LESSON.title;
+    el("nodemeta").textContent = "";
+    [["node", n.id], ["kind", n.kind], ["of", (S.idx + 1) + " / " + LESSON.nodes.length]]
+      .forEach(function (pair) {
+        var s = document.createElement("span");
+        s.textContent = pair[0] + " " + pair[1];
+        el("nodemeta").appendChild(s);
+      });
+
+    var p = el("prose");
+    p.textContent = "";
+    var c = Math.max(0, Math.min(spokenChars || 0, n.text.length));
+    if (c > 0) {
+      var done = document.createElement("span");
+      done.className = "spoken";
+      done.textContent = n.text.slice(0, c);
+      p.appendChild(done);
+      if (c < n.text.length && S.speaking) {
+        var cur = document.createElement("span");
+        cur.className = "cursor";
+        p.appendChild(cur);
+      }
+    }
+    p.appendChild(document.createTextNode(n.text.slice(c)));
+
+    var fig = el("codefig");
+    if (n.kind === "code") {
+      fig.hidden = false;
+      el("codecap").textContent = n.caption;
+      el("codebody").textContent = n.code;
+      S.canvas = "code:" + n.id;
+    } else {
+      fig.hidden = true;
+      S.canvas = "none";
+    }
+
+    var opts = el("checkopts");
+    if (n.kind === "check" && S.state === STATES.CHECKING) {
+      if (opts.dataset.for !== n.id) {       // build once per check, not once per word
+        opts.dataset.for = n.id;
+        opts.textContent = "";
+        n.options.forEach(function (o, i) {
+          var b = document.createElement("button");
+          b.textContent = o;
+          b.onclick = function () { answerCheck(i); };
+          opts.appendChild(b);
+        });
+      }
+      opts.hidden = false;
+    } else {
+      opts.hidden = true;
+      opts.dataset.for = "";
+    }
+
+    renderRail();
+    renderPointer();
+  }
+
+  function renderPointer() {
+    var n = node();
+    el("p-lesson").textContent = LESSON.id;
+    el("p-node").textContent = n.id + "  (" + n.kind + ")";
+    el("p-offset").textContent = S.offset + " ch  of " + n.text.length;
+    el("p-canvas").textContent = S.canvas;
+  }
+
+  function log(kind, msg) {
+    var box = el("log");
+    if (!LOGN) box.textContent = "";
+    LOGN++;
+    var row = document.createElement("div");
+    row.className = "log-row ev-" + kind;
+    var t = document.createElement("time");
+    t.textContent = new Date().toLocaleTimeString([], { hour12: false }).slice(3);
+    var s = document.createElement("span");
+    s.textContent = msg;
+    row.appendChild(t); row.appendChild(s);
+    box.insertBefore(row, box.firstChild);
+  }
+
+  function renderMetrics() {
+    var st = S.stats;
+    el("m-barges").textContent = st.barges;
+    el("m-false").textContent = st.falsePos;
+
+    if (st.lat.length) {
+      var last = st.lat[st.lat.length - 1];
+      var worst = Math.max.apply(null, st.lat);
+      var best = Math.min.apply(null, st.lat);
+      el("m-latency").innerHTML = Math.round(last) + " <small>ms</small>";
+      el("m-latency-sub").textContent = "best " + Math.round(best) + " · worst " + Math.round(worst) + " · budget 300";
+      var tile = el("tile-latency");
+      tile.className = "tile " + (worst <= 300 ? "budget-ok" : "budget-blown");
+    }
+    if (st.resumesTotal) {
+      el("m-resumes").innerHTML = st.midResume + " <small>/ " + st.resumesTotal + "</small>";
+    }
+    el("m-barges-sub").textContent = st.barges === 0
+      ? "the number that matters"
+      : (st.barges === 1 ? "once — will you do it again?" : "still interrupting. good sign.");
+  }
+
+  /* ============================ speech out ============================ */
+  var synth = window.speechSynthesis;
+  var voiceReady = !!synth;
+
+  function speak(fromChar) {
+    if (!voiceReady) { fakeSpeak(fromChar); return; }
+    var n = node();
+    var text = n.text.slice(fromChar || 0);
+    var base = fromChar || 0;
+
+    var u = new SpeechSynthesisUtterance(text);
+    u.rate = S.rate;
+    u.pitch = 1;
+    S.utterance = u;
+    S.speaking = true;
+
+    var started = performance.now();
+    var boundaryFired = false;
+
+    u.onboundary = function (e) {
+      boundaryFired = true;
+      S.offset = base + (e.charIndex || 0);
+      renderNode(S.offset);
+    };
+    // Safari and some engines never fire boundary events: estimate from elapsed time.
+    var estimator = setInterval(function () {
+      if (boundaryFired || !S.speaking) return;
+      var elapsed = performance.now() - started;
+      var cps = 14 * S.rate; // characters per second, rough
+      S.offset = Math.min(n.text.length, base + Math.floor(elapsed / 1000 * cps));
+      renderNode(S.offset);
+    }, 120);
+
+    u.onend = function () {
+      clearInterval(estimator);
+      if (!S.speaking) return;      // cancelled — handled by the barge-in path
+      S.speaking = false;
+      S.offset = n.text.length;
+      renderNode(S.offset);
+      savePointer();
+      nodeComplete();
+    };
+    u.onerror = function () { clearInterval(estimator); S.speaking = false; };
+
+    synth.cancel();
+    synth.speak(u);
+  }
+
+  // No speechSynthesis at all: still exercise the pointer and the barge-in path.
+  var fakeTimer = null;
+  function fakeSpeak(fromChar) {
+    var n = node();
+    S.speaking = true;
+    S.offset = fromChar || 0;
+    clearInterval(fakeTimer);
+    fakeTimer = setInterval(function () {
+      if (!S.speaking) { clearInterval(fakeTimer); return; }
+      S.offset += Math.round(14 * S.rate / 8);
+      if (S.offset >= n.text.length) {
+        S.offset = n.text.length;
+        S.speaking = false;
+        clearInterval(fakeTimer);
+        renderNode(S.offset);
+        savePointer();
+        nodeComplete();
+        return;
+      }
+      renderNode(S.offset);
+    }, 125);
+  }
+
+  function stopSpeech() {
+    S.speaking = false;
+    clearInterval(fakeTimer);
+    if (voiceReady) synth.cancel();
+  }
+
+  /* ============================ lesson flow ============================ */
+  function startLesson(resume) {
+    el("btn-start").disabled = true;
+    el("btn-pause").disabled = false;
+    el("btn-barge").disabled = false;
+    setState(STATES.LOADING);
+
+    var from = 0;
+    if (resume) {
+      var i = LESSON.nodes.findIndex(function (n) { return n.id === resume.node; });
+      if (i >= 0) { S.idx = i; from = resume.offset || 0; S.canvas = resume.canvas; }
+      log("resume", "restored pointer from storage → " + resume.node + " @ " + from + "ch");
+    }
+    setTimeout(function () { teach(from); }, 180);
+  }
+
+  function teach(fromChar) {
+    var n = node();
+    if (n.kind === "check") {
+      setState(STATES.CHECKING);
+      S.offset = 0;
+      renderNode(0);
+      speak(0);
+      return;
+    }
+    setState(STATES.TEACHING);
+    S.offset = fromChar || 0;
+    renderNode(S.offset);
+    hideDetour();
+    speak(S.offset);
+  }
+
+  function nodeComplete() {
+    if (S.state === STATES.CHECKING) return;   // wait for the student
+    if (S.idx >= LESSON.nodes.length - 1) {
+      setState(STATES.DONE);
+      log("resume", "lesson complete — " + S.stats.barges + " interruptions over " + LESSON.nodes.length + " nodes");
+      el("btn-pause").disabled = true;
+      el("btn-barge").disabled = true;
+      return;
+    }
+    S.idx++;
+    S.offset = 0;
+    savePointer();                              // checkpoint on every node boundary
+    teach(0);
+  }
+
+  function answerCheck(i) {
+    var n = node();
+    el("checkopts").hidden = true;
+    el("checkopts").dataset.for = "";
+    stopSpeech();
+    if (i === n.correct) {
+      setState(STATES.TEACHING);
+      showDetour("Correct", n.praise, n.id, false);
+      log("resume", "check " + n.id + " passed → advancing");
+      setTimeout(function () { S.idx++; S.offset = 0; savePointer(); teach(0); }, 1400);
+    } else {
+      setState(STATES.ADAPTING);
+      var back = LESSON.nodes.findIndex(function (x) { return x.id === n.onWrong; });
+      showDetour("Not quite", "Let me take that one again from a different angle.", n.onWrong, false);
+      log("false", "check " + n.id + " failed → reteaching " + n.onWrong);
+      setTimeout(function () { S.idx = back; S.offset = 0; teach(0); }, 1600);
+    }
+  }
+
+  /* ============================ barge-in ============================ */
+  function bargeIn(source) {
+    if (S.state !== STATES.TEACHING && S.state !== STATES.CHECKING) return;
+
+    var t0 = performance.now();
+    stopSpeech();
+    var t1 = performance.now();
+
+    S.returnTo = { idx: S.idx, offset: S.offset, canvas: S.canvas };
+    S.stats.barges++;
+    S.stats.lat.push(t1 - t0);
+    setState(STATES.LISTENING);
+    renderMetrics();
+    renderNode(S.offset);
+    log("barge", "barge-in (" + source + ") → silence in " + (t1 - t0).toFixed(1) + "ms, held " + node().id + " @ " + S.offset + "ch");
+
+    startRecognition();
+
+    // False-positive path: nothing intelligible arrives, so resume mid-utterance.
+    clearTimeout(S.fpTimer);
+    S.fpTimer = setTimeout(function () {
+      if (S.state !== STATES.LISTENING) return;
+      stopRecognition();
+      S.stats.falsePos++;
+      renderMetrics();
+      log("false", "no speech in 1.2s → false positive, resuming mid-utterance");
+      resume();
+    }, 1200);
+  }
+
+  function resume() {
+    clearTimeout(S.fpTimer);
+    var r = S.returnTo;
+    if (!r) return;
+    S.stats.resumesTotal++;
+    if (r.offset > 0) S.stats.midResume++;
+    S.idx = r.idx;
+    S.offset = r.offset;
+    S.canvas = r.canvas;
+    renderMetrics();
+    log("resume", "resumed " + node().id + " @ " + S.offset + "ch, canvas " + S.canvas);
+    setState(STATES.TEACHING);
+    renderNode(S.offset);
+    speak(S.offset);
+    S.returnTo = null;
+  }
+
+  /* ============================ interruption handling ============================ */
+  function handleUtterance(text) {
+    clearTimeout(S.fpTimer);
+    stopRecognition();
+    if (!text || !text.trim()) { resume(); return; }
+    var q = text.toLowerCase().trim();
+    setState(STATES.ANSWERING);
+    log("barge", "heard: “" + text + "”");
+
+    // FR-9: an interruption is a question, a pacing request, or a topic change.
+    if (/\b(again|repeat|say that|didn.?t catch|pardon|what\?)\b/.test(q)) {
+      showDetour("Repeat", "Of course — from the top of that one.", node().id, false);
+      log("resume", "intent: repeat → restarting " + node().id + " from 0ch");
+      S.returnTo.offset = 0;
+      setTimeout(resume, 900);
+      return;
+    }
+    if (/\b(slow(er)?|slow down|too fast)\b/.test(q)) {
+      S.rate = Math.max(0.6, S.rate - 0.2);
+      showDetour("Pacing", "Slowing down — rate is now " + S.rate.toFixed(1) + "x.", node().id, false);
+      log("resume", "intent: pace → rate " + S.rate.toFixed(1));
+      setTimeout(resume, 900);
+      return;
+    }
+    if (/\b(fast(er)?|speed up)\b/.test(q)) {
+      S.rate = Math.min(1.6, S.rate + 0.2);
+      showDetour("Pacing", "Speeding up — rate is now " + S.rate.toFixed(1) + "x.", node().id, false);
+      setTimeout(resume, 900);
+      return;
+    }
+
+    var hit = null;
+    for (var i = 0; i < ANSWERS.length && !hit; i++) {
+      for (var k = 0; k < ANSWERS[i].keys.length; k++) {
+        if (q.indexOf(ANSWERS[i].keys[k]) !== -1) { hit = ANSWERS[i]; break; }
+      }
+    }
+    if (hit) {
+      showDetour("Answer", hit.text, hit.src, false);
+      speakAside(hit.text);
+      log("barge", "answered from " + hit.src);
+    } else {
+      var oos = "That is outside this lesson — it is not in the material I have for “" + LESSON.title + "”. I can come back to it, but I would be guessing if I answered now.";
+      showDetour("Out of scope", oos, null, true);
+      speakAside(oos);
+      log("false", "unmatched → declared out of scope");
+    }
+  }
+
+  function speakAside(text) {
+    if (!voiceReady) { setTimeout(resume, 2600); return; }
+    var u = new SpeechSynthesisUtterance(text);
+    u.rate = S.rate;
+    u.onend = function () { if (S.state === STATES.ANSWERING) resume(); };
+    u.onerror = function () { if (S.state === STATES.ANSWERING) resume(); };
+    synth.cancel();
+    synth.speak(u);
+  }
+
+  function showDetour(label, body, cite, oos) {
+    el("detour").hidden = false;
+    el("detour-lbl").textContent = label;
+    el("detour-body").textContent = body;
+    var c = el("detour-cite");
+    c.className = "cite" + (oos ? " oos" : "");
+    c.textContent = oos ? "no source in this lesson" : ("source: " + cite);
+  }
+  function hideDetour() { el("detour").hidden = true; }
+
+  /* ============================ mic: VAD + recognition ============================ */
+  var rec = null, recActive = false;
+  var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+  function startRecognition() {
+    if (!SR) return;
+    try {
+      rec = new SR();
+      rec.lang = "en-US";
+      rec.interimResults = false;
+      rec.maxAlternatives = 1;
+      rec.onresult = function (e) {
+        recActive = false;
+        handleUtterance(e.results[0][0].transcript);
+      };
+      rec.onerror = function () { recActive = false; };
+      rec.onend = function () { recActive = false; };
+      rec.start();
+      recActive = true;
+    } catch (e) { recActive = false; }
+  }
+  function stopRecognition() {
+    if (rec && recActive) { try { rec.stop(); } catch (e) {} }
+    recActive = false;
+  }
+
+  function armMic() {
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      el("mic-label").textContent = "no mic api — use space";
+      return;
+    }
+    navigator.mediaDevices.getUserMedia({ audio: true }).then(function (stream) {
+      var AC = window.AudioContext || window.webkitAudioContext;
+      var ctx = new AC();
+      var src = ctx.createMediaStreamSource(stream);
+      var an = ctx.createAnalyser();
+      an.fftSize = 512;
+      src.connect(an);
+      var buf = new Float32Array(an.fftSize);
+
+      el("mic-dot").className = "dot live";
+      el("mic-label").textContent = "listening";
+
+      var floor = 0.006, hot = 0, calibN = 0;
+
+      setInterval(function () {
+        an.getFloatTimeDomainData(buf);
+        var sum = 0;
+        for (var i = 0; i < buf.length; i++) sum += buf[i] * buf[i];
+        var rms = Math.sqrt(sum / buf.length);
+
+        // Adapt the noise floor only while nothing is being said to us.
+        if (calibN < 400 || (!S.speaking && rms < floor * 2)) {
+          floor = floor * 0.97 + rms * 0.03;
+          calibN++;
+        }
+        var threshold = Math.max(floor * 3.2, 0.018);
+        el("mic-level").style.width = Math.min(100, (rms / (threshold * 2)) * 100) + "%";
+
+        if (rms > threshold) {
+          hot++;
+          el("mic-dot").className = "dot hot";
+          // Two consecutive frames over threshold — the client decides alone, no server.
+          if (hot === 2 && S.speaking) bargeIn("vad");
+        } else {
+          hot = 0;
+          el("mic-dot").className = "dot live";
+        }
+      }, 10);
+    }).catch(function () {
+      el("mic-label").textContent = "mic denied — use space";
+    });
+  }
+
+  /* ============================ wiring ============================ */
+  el("btn-start").onclick = function () {
+    armMic();
+    var p = loadPointer();
+    startLesson(p);
+  };
+  el("btn-pause").onclick = function () {
+    if (S.state === STATES.PAUSED) {
+      el("btn-pause").textContent = "Pause";
+      teach(S.offset);
+    } else {
+      stopSpeech();
+      setState(STATES.PAUSED);
+      savePointer();
+      el("btn-pause").textContent = "Resume";
+      log("resume", "paused at " + node().id + " @ " + S.offset + "ch — pointer saved");
+    }
+  };
+  el("btn-barge").onclick = function () { bargeIn("button"); };
+  el("btn-reset").onclick = function () {
+    stopSpeech(); stopRecognition();
+    try { localStorage.removeItem("lumen.pointer"); } catch (e) {}
+    S.idx = 0; S.offset = 0; S.rate = 1; S.returnTo = null;
+    S.stats = { barges: 0, falsePos: 0, midResume: 0, resumesTotal: 0, lat: [] };
+    LOGN = 0;
+    el("log").innerHTML = '<div class="log-empty">Reset. Start the lesson, then interrupt it.</div>';
+    el("btn-start").disabled = false;
+    el("btn-pause").disabled = true;
+    el("btn-pause").textContent = "Pause";
+    el("btn-barge").disabled = true;
+    el("m-latency").textContent = "—";
+    el("m-latency-sub").textContent = "budget 300 ms";
+    el("tile-latency").className = "tile";
+    el("m-resumes").textContent = "—";
+    setState(STATES.IDLE);
+    hideDetour();
+    renderNode(0);
+    renderMetrics();
+  };
+  el("btn-ask").onclick = function () {
+    var v = el("ask").value;
+    el("ask").value = "";
+    if (S.state === STATES.TEACHING || S.state === STATES.CHECKING) bargeIn("typed");
+    if (S.state === STATES.LISTENING) handleUtterance(v);
+  };
+  el("ask").addEventListener("keydown", function (e) {
+    if (e.key === "Enter") el("btn-ask").click();
+  });
+  document.addEventListener("keydown", function (e) {
+    if (e.code === "Space" && e.target.tagName !== "INPUT") {
+      e.preventDefault();
+      bargeIn("space");
+    }
+  });
+
+  /* Show the page at rest: node one is already on the canvas before anything starts. */
+  renderNode(0);
+  renderMetrics();
+  var saved = loadPointer();
+  if (saved) {
+    el("p-saved").textContent = new Date(saved.at).toLocaleTimeString();
+    log("resume", "found a saved pointer — " + saved.node + " @ " + saved.offset + "ch. Start will resume there.");
+  }
+})();
+</script>
