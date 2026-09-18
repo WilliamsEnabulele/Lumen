@@ -1,0 +1,19 @@
+# Build output
+bin/
+obj/
+[Dd]ebug/
+[Rr]elease/
+*.user
+
+# Local configuration and credentials
+.env
+appsettings.*.local.json
+
+# Local object storage and audio cache
+.local-storage/
+
+# Tooling
+.vs/
+.idea/
+.vscode/
+node_modules/
