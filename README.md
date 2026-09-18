@@ -42,6 +42,34 @@ question, and then picks up exactly where it left off.
 - **Multi-tenant from the first migration.** A column and a query filter now; a migration
   through every table later, with an institutional customer watching.
 
+## What is built
+
+| | |
+|---|---|
+| `projects/domain` | The rules the client and server both hold: the resume pointer, where an interrupted utterance re-enters, the session state machine, the register ladder |
+| `projects/tutor-voice` | The client half of the tutor: the microphone gate that decides to stop, speech output that knows where it got to, and the session that holds the pointer |
+| `src/app/lesson` | The student's view — canvas, pointer readout, and the instrumentation the corridor test argued for |
+| `prototypes/corridor-test` | The original single-file rig. Kept because it is the cheapest way to re-ask the only question that matters |
+
+The backend is a separate repository: **[WilliamsEnabulele/Lumen-BE](https://github.com/WilliamsEnabulele/Lumen-BE)**.
+
+Two rules are implemented twice on purpose — `snapBack` and the session state machine exist in
+both TypeScript and C#. Not an oversight: the client has to decide where to resume inside the
+barge-in budget, and a round trip to ask the server spends that budget before anything has been
+decided. The duplication is kept honest by holding both to the same test cases.
+
+## Running
+
+```bash
+npm install
+npm run build:libs   # libraries first; the app consumes them from dist
+npm start            # the student app on :4200
+npm test             # domain, tutor-voice, then the app
+```
+
+Tests run in headless Chromium. The lesson is currently a fixture in `LessonGateway` — every
+method there is a stand-in for an endpoint the backend does not serve yet, and each is marked.
+
 ## Stack
 
 ASP.NET Core on PostgreSQL. Object storage for source documents and the pre-synthesised audio

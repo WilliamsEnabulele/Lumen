@@ -1,0 +1,137 @@
+<header class="topbar">
+  <div class="brand">
+    <b>Lumen</b>
+    <span class="eyebrow">{{ session.script()?.lessonId ?? 'no lesson loaded' }}</span>
+  </div>
+  <span class="statepill" [attr.data-s]="state()">{{ state() }}</span>
+</header>
+
+<div class="controls">
+  @if (state() === 'idle' || state() === 'loadingLesson') {
+    <button class="primary" (click)="start()">Start lesson</button>
+  } @else if (state() === 'paused') {
+    <button class="primary" (click)="resume()">Resume</button>
+  } @else {
+    <button (click)="pause()">Pause</button>
+  }
+  <button (click)="interruptManually()" [disabled]="state() !== 'teaching' && state() !== 'checkingUnderstanding'">
+    Interrupt
+  </button>
+
+  <span class="mic">
+    @if (micError()) {
+      <span class="mic-off">mic unavailable — use Interrupt</span>
+    } @else {
+      <span class="dot" [class.live]="session.state() !== 'idle'"></span>
+      <span class="level"><i [style.width.%]="micLevel() * 100"></i></span>
+    }
+  </span>
+</div>
+
+<div class="metrics">
+  <div class="tile">
+    <span class="k">Barge-in → silence</span>
+    <span class="v">{{ lastStopMs() !== null ? (lastStopMs() | number: '1.0-1') : '—' }}<small>{{ lastStopMs() !== null ? ' ms' : '' }}</small></span>
+    <span class="sub">budget 300 ms</span>
+  </div>
+  <div class="tile">
+    <span class="k">Interruptions</span>
+    <span class="v">{{ session.interruptions() }}</span>
+    <span class="sub">whether they try again is the result</span>
+  </div>
+  <div class="tile">
+    <span class="k">Resumed mid-utterance</span>
+    <span class="v">{{ session.midUtteranceResumes() }}</span>
+    <span class="sub">rather than at a node start</span>
+  </div>
+  <div class="tile">
+    <span class="k">False positives</span>
+    <span class="v">{{ session.falsePositives() }}</span>
+    <span class="sub">stopped for nothing</span>
+  </div>
+</div>
+
+<div class="grid">
+  <main class="panel">
+    <div class="panel-h">
+      <span>Lesson canvas</span>
+      @if (node()?.sourceRef) {
+        <span class="source">source {{ node()!.sourceRef }}</span>
+      }
+    </div>
+
+    <div class="rail">
+      @for (n of session.script()?.nodes ?? []; track n.id) {
+        <i [class.here]="n.id === node()?.id" [attr.data-kind]="n.kind" [title]="n.id"></i>
+      }
+    </div>
+
+    <div class="panel-b">
+      @if (node(); as current) {
+        <p class="prose"><span class="spoken">{{ spokenText() }}</span>{{ pendingText() }}</p>
+
+        @if (visual(); as code) {
+          <figure class="code">
+            <figcaption>{{ current.visualRef }}</figcaption>
+            <pre>{{ code }}</pre>
+          </figure>
+        }
+
+        @if (check(); as options) {
+          @if (state() === 'checkingUnderstanding') {
+            <div class="check">
+              @for (option of options.options; track option; let i = $index) {
+                <button (click)="answerCheck(i)">{{ option }}</button>
+              }
+            </div>
+          }
+        }
+
+        @if (detour(); as note) {
+          <p class="note">{{ note }}</p>
+        }
+
+        @if (answer(); as grounded) {
+          <div class="detour">
+            <span class="lbl">{{ grounded.sourceNodeId ? 'Answer' : 'Out of scope' }}</span>
+            <p>{{ grounded.text }}</p>
+            <span class="cite" [class.oos]="!grounded.sourceNodeId">
+              {{ grounded.sourceNodeId ? 'source: ' + grounded.sourceNodeId : 'no source in this lesson' }}
+            </span>
+          </div>
+        }
+      } @else {
+        <p class="prose empty">Press start. Then interrupt it — that is what it is for.</p>
+      }
+
+      <div class="askrow">
+        <input
+          id="ask"
+          name="ask"
+          [ngModel]="question()"
+          (ngModelChange)="question.set($event)"
+          (keydown.enter)="ask()"
+          placeholder="Interrupt — “why does that multiply?”, “say that again”, “slow down”"
+          autocomplete="off" />
+        <button (click)="ask()">Ask</button>
+      </div>
+    </div>
+  </main>
+
+  <aside class="panel">
+    <div class="panel-h">Resume pointer</div>
+    <div class="panel-b">
+      @if (session.pointer(); as pointer) {
+        <dl class="kv">
+          <dt>lesson</dt><dd>{{ pointer.lessonId }}</dd>
+          <dt>node</dt><dd class="hl">{{ pointer.scriptNodeId }}</dd>
+          <dt>offset</dt><dd>{{ pointer.utteranceOffset }} ch of {{ node()?.text?.length ?? 0 }}</dd>
+          <dt>canvas</dt><dd>{{ pointer.canvasState }}</dd>
+          <dt>rewind</dt><dd>{{ rewoundBy() }} ch to the clause</dd>
+        </dl>
+      } @else {
+        <p class="none">No pointer yet.</p>
+      }
+    </div>
+  </aside>
+</div>

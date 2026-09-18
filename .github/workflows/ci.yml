@@ -1,0 +1,24 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      # The libraries are consumed from dist, so they build before anything that imports them.
+      - run: npx ng build domain
+      - run: npx ng build tutor-voice
+      - run: npx ng test domain --watch=false
+      - run: npx ng test tutor-voice --watch=false
+      - run: npx ng test lumen --watch=false
+      - run: npx ng build lumen

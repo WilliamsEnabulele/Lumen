@@ -17,3 +17,11 @@ appsettings.*.local.json
 .idea/
 .vscode/
 node_modules/
+
+# Angular / node
+node_modules/
+dist/
+.angular/
+*.tsbuildinfo
+.npm
+coverage/
