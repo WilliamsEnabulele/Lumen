@@ -1,9 +1,9 @@
 import { Component, OnDestroy, computed, inject, input, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { GroundedAnswer, ScriptNode, isAssessment, toLessonScript } from 'domain';
+import { SessionStarted } from 'domain';
 import { BargeInDetector, SpeechOutput, TutorSession } from 'tutor-voice';
 import { LumenApi } from '../api/lumen-api';
-import { ConceptCanvas } from './concept-canvas';
+import { TutorCanvas } from './tutor-canvas';
 import { OrbMode, VoiceOrb } from './voice-orb';
 
 /** How long to wait for something intelligible before calling it a cough and carrying on. */
@@ -21,7 +21,7 @@ type Recognition = {
 
 @Component({
   selector: 'lumen-tutor',
-  imports: [FormsModule, VoiceOrb, ConceptCanvas],
+  imports: [FormsModule, VoiceOrb, TutorCanvas],
   templateUrl: './tutor.html',
   styleUrl: './tutor.scss',
 })
@@ -29,26 +29,18 @@ export class Tutor implements OnDestroy {
   private readonly api = inject(LumenApi);
   private readonly speech = inject(SpeechOutput);
   private readonly detector = inject(BargeInDetector);
-  private readonly session = inject(TutorSession);
+  readonly session = inject(TutorSession);
 
   readonly courseId = input.required<string>();
 
-  readonly courseTitle = signal('');
-  readonly lessonTitle = signal('');
-  readonly lessonId = signal<string | null>(null);
-  readonly loading = signal(true);
+  readonly course = signal<SessionStarted | null>(null);
   readonly error = signal<string | null>(null);
   readonly started = signal(false);
-
-  readonly spokenTo = signal(0);
-  readonly answer = signal<GroundedAnswer | null>(null);
-  readonly aside = signal<string | null>(null);
-  readonly question = signal('');
   readonly micDenied = signal(false);
-  readonly rate = signal(1);
+  readonly question = signal('');
 
-  readonly node = this.session.currentNode;
   readonly state = this.session.state;
+  readonly canvas = this.session.canvas;
   readonly progress = this.session.progress;
   readonly micLevel = this.detector.level;
 
@@ -59,21 +51,19 @@ export class Tutor implements OnDestroy {
         return this.speech.speaking ? 'speaking' : 'idle';
       case 'listening':
         return 'listening';
-      case 'answering':
-        return 'speaking';
-      case 'checkingUnderstanding':
-        return 'listening';
-      case 'adapting':
+      case 'thinking':
         return 'thinking';
       default:
         return 'idle';
     }
   });
 
-  readonly spokenText = computed(() => this.node()?.text.slice(0, this.spokenTo()) ?? '');
-  readonly pendingText = computed(() => this.node()?.text.slice(this.spokenTo()) ?? '');
-  readonly canInterrupt = computed(() => this.state() === 'teaching' || this.state() === 'checkingUnderstanding');
+  readonly canInterrupt = computed(() => this.state() === 'teaching');
 
+  /** True when no model is configured, so the degraded mode is visible rather than silent. */
+  readonly degraded = computed(() => this.session.tutorName().startsWith('scripted'));
+
+  private sessionId: string | null = null;
   private falsePositiveTimer: ReturnType<typeof setTimeout> | null = null;
   private recognition: Recognition | null = null;
 
@@ -82,36 +72,12 @@ export class Tutor implements OnDestroy {
   }
 
   private load(): void {
-    this.api.course(this.courseId()).subscribe({
-      next: (course) => {
-        this.courseTitle.set(course.title);
-        const first = [...course.lessons].sort((a, b) => a.ordinal - b.ordinal)[0];
-        if (!first) {
-          this.error.set('That document did not produce a lesson to teach.');
-          this.loading.set(false);
-          return;
-        }
-        this.loadLesson(first.id);
+    this.api.startSession(this.courseId()).subscribe({
+      next: (started) => {
+        this.course.set(started);
+        this.sessionId = started.sessionId;
       },
-      error: (failure: Error) => {
-        this.error.set(failure.message);
-        this.loading.set(false);
-      },
-    });
-  }
-
-  private loadLesson(lessonId: string): void {
-    this.api.script(lessonId).subscribe({
-      next: (response) => {
-        this.lessonId.set(response.lessonId);
-        this.lessonTitle.set(response.title);
-        this.session.loadLesson(toLessonScript(response.lessonId, response.nodes));
-        this.loading.set(false);
-      },
-      error: (failure: Error) => {
-        this.error.set(failure.message);
-        this.loading.set(false);
-      },
+      error: (failure: Error) => this.error.set(failure.message),
     });
   }
 
@@ -126,7 +92,7 @@ export class Tutor implements OnDestroy {
       this.micDenied.set(true);
     }
 
-    this.teach(this.session.beginTeaching(), 0);
+    this.nextTurn(null);
   }
 
   /** The student cut in. Stop first, work out what they wanted afterwards. */
@@ -136,14 +102,14 @@ export class Tutor implements OnDestroy {
     const heardUpTo = this.speech.stop();
     this.detector.setTutorSpeaking(false);
     this.session.bargeIn(heardUpTo);
-    this.answer.set(null);
-    this.aside.set(null);
     this.listen();
 
     this.falsePositiveTimer = setTimeout(() => {
       if (this.state() !== 'listening') return;
       this.stopListening();
-      this.resumeFrom(this.session.falsePositive());
+      // Nothing intelligible: pick the same turn back up rather than asking for a new one.
+      this.session.moveTo('teaching');
+      this.speakCurrentTurn(this.session.resumeOffset());
     }, FALSE_POSITIVE_WINDOW_MS);
   }
 
@@ -151,19 +117,9 @@ export class Tutor implements OnDestroy {
     const asked = this.question().trim();
     if (!asked) return;
     this.question.set('');
+
     if (this.canInterrupt()) this.onBargeIn();
-    this.handle(asked);
-  }
-
-  pause(): void {
-    this.speech.stop();
-    this.detector.setTutorSpeaking(false);
-    this.stopListening();
-    this.session.pause();
-  }
-
-  resume(): void {
-    this.resumeFrom(this.session.resume());
+    this.said(asked);
   }
 
   ngOnDestroy(): void {
@@ -173,84 +129,52 @@ export class Tutor implements OnDestroy {
     this.detector.disarm();
   }
 
-  /** An interruption is a question, a pacing request, or a request to hear it again. */
-  private handle(said: string): void {
+  private said(text: string): void {
     this.clearTimer();
     this.stopListening();
-    if (this.state() !== 'listening') return;
+    this.nextTurn(text);
+  }
 
-    this.session.startAnswering();
+  /** Ask the tutor for its next turn, then speak whatever comes back. */
+  private nextTurn(said: string | null): void {
+    if (!this.sessionId || this.state() === 'complete') return;
 
-    if (/\b(again|repeat|say that)\b/i.test(said)) {
-      this.aside.set('Of course — from the top of that one.');
-      this.resumeFrom({ ...this.session.resume(), speakFrom: 0 });
-      return;
-    }
+    this.session.moveTo('thinking');
+    this.detector.setTutorSpeaking(false);
 
-    if (/\b(slow|slower|too fast)\b/i.test(said)) {
-      this.rate.update((current) => Math.max(0.6, current - 0.2));
-      this.aside.set(`Slowing down.`);
-      this.resumeFrom(this.session.resume());
-      return;
-    }
-
-    const lessonId = this.lessonId();
-    if (!lessonId) {
-      this.resumeFrom(this.session.resume());
-      return;
-    }
-
-    // The lesson the student is in, and the node they are on. Asking about "that" only means
-    // anything if the question carries where "that" was.
-    this.api.ask(lessonId, said, this.node()?.id ?? null).subscribe({
-      next: (grounded) => {
-        this.answer.set(grounded);
-        this.speech.speak(grounded.text, {
-          rate: this.rate(),
-          onFinished: () => this.resumeFrom(this.session.resume()),
-        });
+    this.api.turn(this.sessionId, said).subscribe({
+      next: (turn) => {
+        this.session.beginTurn(turn);
+        if (turn.complete && !turn.said) return;
+        this.speakCurrentTurn(0);
       },
-      error: () => this.resumeFrom(this.session.resume()),
+      error: (failure: Error) => {
+        this.error.set(failure.message);
+        this.session.moveTo('idle');
+      },
     });
   }
 
-  private resumeFrom(instruction: { node: ScriptNode; speakFrom: number }): void {
-    this.clearTimer();
-    this.teach(instruction.node, instruction.speakFrom);
-  }
+  private speakCurrentTurn(fromCharacter: number): void {
+    const text = this.session.said();
+    if (!text) {
+      this.nextTurn(null);
+      return;
+    }
 
-  private teach(node: ScriptNode, fromCharacter: number): void {
-    this.spokenTo.set(fromCharacter);
+    this.session.noteProgress(fromCharacter);
     this.detector.setTutorSpeaking(true);
 
-    this.speech.speak(node.text, {
+    this.speech.speak(text, {
       fromCharacter,
-      rate: this.rate(),
-      onProgress: (offset) => {
-        this.spokenTo.set(offset);
-        this.session.noteProgress(offset);
-      },
+      onProgress: (offset) => this.session.noteProgress(offset),
       onFinished: () => {
         this.detector.setTutorSpeaking(false);
-        if (isAssessment(node)) {
-          this.session.askCheck();
-          this.listen();
-          return;
-        }
-        this.advance();
+        if (this.state() === 'complete') return;
+        // Silence from the student is itself an answer: carry on.
+        this.nextTurn(null);
       },
     });
-  }
-
-  private advance(): void {
-    const next = this.session.nodeComplete();
-    if (!next) {
-      this.stopListening();
-      return;
-    }
-    this.aside.set(null);
-    this.answer.set(null);
-    this.teach(next, 0);
   }
 
   private listen(): void {
@@ -264,7 +188,7 @@ export class Tutor implements OnDestroy {
       const recognition = new (Recognizer as new () => Recognition)();
       recognition.lang = 'en-NG';
       recognition.interimResults = false;
-      recognition.onresult = (event) => this.handle(event.results[0][0].transcript);
+      recognition.onresult = (event) => this.said(event.results[0][0].transcript);
       recognition.onerror = () => this.stopListening();
       recognition.onend = () => (this.recognition = null);
       recognition.start();

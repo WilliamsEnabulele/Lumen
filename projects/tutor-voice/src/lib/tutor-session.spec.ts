@@ -1,28 +1,17 @@
-import { LessonScript, ScriptNode, toLessonScript } from 'domain';
+import { TurnTaken } from 'domain';
 import { TutorSession } from './tutor-session';
 
-function node(id: string, ordinal: number, text: string, visualRef?: string): ScriptNode {
+function turn(said: string, drew: TurnTaken['drew'] = [], complete = false): TurnTaken {
   return {
-    id,
-    lessonId: 'les_loops_01',
-    ordinal,
-    kind: visualRef ? 'codeplayground' : 'speech',
-    conceptKey: 'nesting',
-    text,
-    pauseAfterMs: 300,
-    visualRef,
-    carriesDefinition: false,
-    visualKind: visualRef ? 'Code' : 'None',
-    interjectionSlots: [],
+    said,
+    drew,
+    conceptComplete: false,
+    complete,
+    lessonTitle: 'Loops',
+    conceptTitle: 'Nesting',
+    sourceRef: 'ch4:p63',
+    tutor: 'anthropic:claude-opus-5',
   };
-}
-
-function lesson(): LessonScript {
-  return toLessonScript('les_loops_01', [
-    node('n01', 1, 'A loop is a promise. The question is how many times it is kept.'),
-    node('n02', 2, 'Ten outer turns, ten inner turns on each one.', 'loops-nested'),
-    node('n03', 3, 'So the counts do not add. They multiply.'),
-  ]);
 }
 
 describe('TutorSession', () => {
@@ -30,120 +19,71 @@ describe('TutorSession', () => {
 
   beforeEach(() => {
     session = new TutorSession();
-    session.loadLesson(lesson());
   });
 
-  it('loads a lesson pointing at its first node', () => {
-    expect(session.state()).toBe('loadingLesson');
-    expect(session.pointer()?.scriptNodeId).toBe('n01');
-    expect(session.pointer()?.utteranceOffset).toBe(0);
+  it('starts idle with nothing on the canvas', () => {
+    expect(session.state()).toBe('idle');
+    expect(session.canvas()).toBeNull();
   });
 
-  it('will not teach before a lesson is loaded', () => {
-    expect(() => new TutorSession().beginTeaching()).toThrowError(/Cannot move/);
-  });
-
-  it('holds the exact offset when the student cuts in, then resumes from a clause boundary', () => {
-    session.beginTeaching();
-    const text = session.currentNode()!.text;
-    const cutOff = text.indexOf('how many');
-
-    const held = session.bargeIn(cutOff);
-    expect(session.state()).toBe('listening');
-    expect(held.utteranceOffset).toBe(cutOff);
-
-    session.startAnswering();
-    const instruction = session.resume();
+  it('draws what the turn drew, then speaks it', () => {
+    session.beginTurn(turn('Nesting multiplies.', [{ tool: 'show_statement', text: 'Nesting multiplies' }]));
 
     expect(session.state()).toBe('teaching');
-    // The pointer keeps the truth; the resume rewinds to the start of the sentence.
-    expect(session.pointer()!.utteranceOffset).toBe(cutOff);
-    expect(instruction.speakFrom).toBe(text.indexOf('The question'));
+    expect(session.canvas()).toEqual({ tool: 'show_statement', text: 'Nesting multiplies' });
+    expect(session.said()).toBe('Nesting multiplies.');
   });
 
-  it('restores the canvas as well as the speech', () => {
-    session.beginTeaching();
-    session.nodeComplete();
-    session.noteProgress(10);
-
-    session.bargeIn(10);
-    const instruction = session.resume();
-
-    expect(instruction.canvasState).toBe('codeplayground:loops-nested');
-  });
-
-  it('counts interruptions, because whether the student tries again is the result', () => {
-    session.beginTeaching();
-    session.bargeIn(5);
-    session.resume();
-    session.bargeIn(7);
-    session.resume();
-
-    expect(session.interruptions()).toBe(2);
-    expect(session.midUtteranceResumes()).toBe(2);
-  });
-
-  it('treats a cough as a false positive and resumes rather than answering it', () => {
-    session.beginTeaching();
-    session.bargeIn(12);
-
-    const instruction = session.falsePositive();
-
-    expect(session.falsePositives()).toBe(1);
-    expect(session.state()).toBe('teaching');
-    expect(instruction.node.id).toBe('n01');
-  });
-
-  it('tracks progress through the node, which is what the canvas animates against', () => {
-    session.beginTeaching();
-    const node = session.currentNode()!;
+  it('progress through the turn is what the canvas animates against', () => {
+    session.beginTurn(turn('0123456789'));
 
     expect(session.progress()).toBe(0);
-    session.noteProgress(Math.floor(node.text.length / 2));
-    expect(session.progress()).toBeCloseTo(0.5, 1);
+    session.noteProgress(5);
+    expect(session.progress()).toBe(0.5);
   });
 
-  it('advances node by node and then finishes', () => {
-    session.beginTeaching();
-    expect(session.nodeComplete()?.id).toBe('n02');
-    expect(session.nodeComplete()?.id).toBe('n03');
-    expect(session.nodeComplete()).toBeNull();
-    expect(session.state()).toBe('lessonComplete');
+  it('a highlight moves the line on code already up', () => {
+    session.beginTurn(turn('Look at the inner loop.', [
+      { tool: 'show_code', language: 'python', source: 'a\nb\nc', highlightLine: 1 },
+    ]));
+    session.draw({ tool: 'highlight_code', line: 2 });
+
+    expect(session.canvas()).toEqual({
+      tool: 'show_code', language: 'python', source: 'a\nb\nc', highlightLine: 2,
+    });
   });
 
-  it('survives a pause and comes back to the same place', () => {
-    session.beginTeaching();
-    session.noteProgress(18);
-    const saved = session.pause();
+  it('records exactly what the student heard before cutting in', () => {
+    const text = 'A loop is a promise. The question is how often it is kept.';
+    session.beginTurn(turn(text));
+    session.noteProgress(30);
 
-    expect(session.state()).toBe('paused');
+    session.bargeIn(30);
 
-    const elsewhere = new TutorSession();
-    elsewhere.restore(lesson(), saved);
-    const instruction = elsewhere.resume();
-
-    expect(elsewhere.state()).toBe('teaching');
-    expect(elsewhere.pointer()!.utteranceOffset).toBe(18);
-    expect(instruction.node.id).toBe('n01');
+    expect(session.state()).toBe('listening');
+    expect(session.heardSoFar()).toBe(text.slice(0, 30));
+    expect(session.interruptions()).toBe(1);
   });
 
-  it('reteaches from an earlier node when a check is failed', () => {
-    session.beginTeaching();
-    session.nodeComplete();
-    session.nodeComplete();
-    session.askCheck();
+  it('resumes from a clause boundary rather than mid-word', () => {
+    const text = 'A loop is a promise. The question is how often it is kept.';
+    session.beginTurn(turn(text));
+    session.bargeIn(text.indexOf('how often'));
 
-    const reteach = session.adapt('n01');
-
-    expect(reteach.id).toBe('n01');
-    expect(session.state()).toBe('teaching');
-    expect(session.pointer()!.scriptNodeId).toBe('n01');
-    expect(session.pointer()!.utteranceOffset).toBe(0);
+    expect(session.resumeOffset()).toBe(text.indexOf('The question'));
   });
 
-  it('refuses to reteach from a node that is not in the script', () => {
-    session.beginTeaching();
-    session.askCheck();
-    expect(() => session.adapt('nope')).toThrowError(/unknown node/);
+  it('a finished course ends the session rather than asking for another turn', () => {
+    session.beginTurn(turn('That is the lot.', [], true));
+
+    expect(session.state()).toBe('complete');
+  });
+
+  it('progress cannot run past the end of the turn', () => {
+    session.beginTurn(turn('short'));
+    session.noteProgress(9999);
+
+    expect(session.spokenTo()).toBe('short'.length);
+    expect(session.progress()).toBe(1);
   });
 });

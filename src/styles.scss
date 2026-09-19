@@ -90,3 +90,13 @@ app-root {
   flex-direction: column;
   flex: 1;
 }
+
+/* KaTeX positions superscripts, fraction bars and radicals with content-box arithmetic. The
+   global border-box reset above silently breaks all of it — an exponent lands on its own line
+   rather than above the baseline — so its own markup keeps the box model it was built for.
+   Global rather than component-scoped because the equation is injected as innerHTML, which
+   view encapsulation does not reach. */
+.katex,
+.katex * {
+  box-sizing: content-box;
+}

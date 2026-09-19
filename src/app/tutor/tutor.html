@@ -1,20 +1,18 @@
-@if (loading()) {
-  <div class="centred"><p class="quiet">Opening the lesson…</p></div>
-} @else if (error(); as message) {
+@if (error(); as message) {
   <div class="centred">
     <h2>That lesson could not be opened</h2>
     <p class="quiet">{{ message }}</p>
   </div>
+} @else if (!course()) {
+  <div class="centred"><p class="quiet">Opening the lesson…</p></div>
 } @else {
   <header class="bar">
     <div class="titles">
-      <span class="course">{{ courseTitle() }}</span>
-      <h1>{{ lessonTitle() }}</h1>
+      <span class="course">{{ course()!.courseTitle }}</span>
+      <h1>{{ session.lessonTitle() || course()!.lessonTitle }}</h1>
     </div>
-    @if (started()) {
-      <button class="ghost" (click)="state() === 'paused' ? resume() : pause()">
-        {{ state() === 'paused' ? 'Resume' : 'Pause' }}
-      </button>
+    @if (started() && session.conceptTitle()) {
+      <span class="concept">{{ session.conceptTitle() }}</span>
     }
   </header>
 
@@ -25,43 +23,38 @@
         <p class="cue">
           @switch (orbMode()) {
             @case ('listening') { Listening — go ahead }
-            @case ('thinking') { Working that out }
-            @case ('speaking') { Speaking. Cut in whenever you like }
+            @case ('thinking') { Thinking }
+            @case ('speaking') { Cut in whenever you like }
             @default { Waiting }
           }
         </p>
       }
     </div>
 
-    <div class="canvas">
+    <div class="board">
       @if (!started()) {
         <div class="opening">
-          <h2>{{ lessonTitle() }}</h2>
-          <p>
-            I will teach this out loud. Stop me whenever you want — just start talking, and I
-            will pick up where I left off afterwards.
-          </p>
+          <h2>{{ course()!.courseTitle }}</h2>
+          <p>{{ course()!.summary }}</p>
           <button class="primary" (click)="begin()">Start the lesson</button>
+          <p class="meta">
+            {{ course()!.lessons.length }} lessons · planned by {{ course()!.authoredBy }}
+          </p>
           @if (micDenied()) {
             <p class="quiet small">No microphone, so type your questions instead.</p>
           }
         </div>
       } @else {
-        <lumen-concept-canvas [node]="node()" [progress]="progress()" />
+        <lumen-tutor-canvas [canvas]="canvas()" [progress]="progress()" />
 
-        @if (answer(); as grounded) {
-          <div class="answer" [class.out-of-scope]="!grounded.inScope">
-            <p>{{ grounded.text }}</p>
-            @if (grounded.sourceRef) {
-              <span class="cite">from {{ grounded.sourceRef }}</span>
-            } @else {
-              <span class="cite">not in this lesson</span>
-            }
-          </div>
+        @if (degraded()) {
+          <p class="degraded">
+            No model is configured, so this is reading the material rather than teaching it.
+          </p>
         }
 
-        @if (aside(); as note) {
-          <p class="aside">{{ note }}</p>
+        @if (state() === 'complete') {
+          <p class="done">That is the end of the course.</p>
         }
       }
     </div>
@@ -70,8 +63,8 @@
   @if (started()) {
     <footer class="caption">
       <p class="said">
-        <span class="spoken">{{ spokenText() }}</span
-        ><span class="ahead">{{ pendingText() }}</span>
+        <span class="spoken">{{ session.spokenText() }}</span
+        ><span class="ahead">{{ session.pendingText() }}</span>
       </p>
 
       <div class="ask">
@@ -81,9 +74,9 @@
           [ngModel]="question()"
           (ngModelChange)="question.set($event)"
           (keydown.enter)="ask()"
-          [placeholder]="canInterrupt() ? 'Or type to interrupt…' : 'Go ahead…'"
+          placeholder="Say something — or type it"
           autocomplete="off" />
-        <button class="ghost" (click)="ask()">Ask</button>
+        <button class="ghost" (click)="ask()">Send</button>
       </div>
     </footer>
   }

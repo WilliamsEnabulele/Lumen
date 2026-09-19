@@ -1,9 +1,5 @@
-import { ScriptNode } from './script-node';
+import { CanvasCommand } from './canvas';
 
-/**
- * The shape of what the backend sends. Kept beside the domain types rather than in the app,
- * because the tutor library reads it too and a contract that lives in one consumer drifts.
- */
 export type IngestionStage =
   | 'Received'
   | 'Extracting'
@@ -24,30 +20,40 @@ export interface IngestionStatus {
   readonly words?: number;
 }
 
-export interface LessonSummary {
-  readonly id: string;
+export interface PlannedConceptView {
   readonly title: string;
-  readonly ordinal: number;
-  readonly nodeCount: number;
 }
 
-export interface CourseSummary {
-  readonly id: string;
+export interface PlannedLessonView {
   readonly title: string;
-  readonly lessons: readonly LessonSummary[];
+  readonly objective: string;
+  readonly concepts: readonly string[];
 }
 
-export interface LessonScriptResponse {
-  readonly lessonId: string;
+export interface SessionStarted {
+  readonly sessionId: string;
   readonly courseId: string;
-  readonly title: string;
-  readonly nodes: readonly ScriptNode[];
+  readonly courseTitle: string;
+  readonly summary: string;
+  /** Which author produced this plan — a model, or the deterministic fallback. */
+  readonly authoredBy: string;
+  readonly lessonTitle: string | null;
+  readonly conceptTitle: string | null;
+  readonly lessons: readonly PlannedLessonView[];
 }
 
-export interface GroundedAnswer {
-  readonly text: string;
-  /** The script node the answer came from, or null when the lesson does not cover it. */
-  readonly sourceNodeId: string | null;
-  readonly sourceRef: string | null;
-  readonly inScope: boolean;
+/**
+ * One turn of the conversation. Nothing is prepared in advance beyond the plan, so this is
+ * everything the tutor decided to say and draw in response to this exact moment.
+ */
+export interface TurnTaken {
+  readonly said: string;
+  readonly drew: readonly CanvasCommand[];
+  readonly conceptComplete: boolean;
+  readonly complete: boolean;
+  readonly lessonTitle: string;
+  readonly conceptTitle: string;
+  readonly sourceRef: string;
+  /** Which brain answered. Names the degraded mode when no model is configured. */
+  readonly tutor: string;
 }

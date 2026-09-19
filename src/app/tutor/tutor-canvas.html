@@ -1,0 +1,95 @@
+@if (statement(); as board) {
+  <p class="statement">{{ board.text }}</p>
+}
+
+@if (stepsBoard(); as board) {
+  <div class="steps">
+    @if (board.title) {
+      <h3>{{ board.title }}</h3>
+    }
+    <ul>
+      @for (step of board.items; track step; let i = $index) {
+        <li [class.revealed]="revealed(i)">{{ step }}</li>
+      }
+    </ul>
+  </div>
+}
+
+@if (codeBoard(); as board) {
+  <figure class="code">
+    <figcaption>{{ board.language }}</figcaption>
+    <pre><code>@for (line of codeLines(); track line.line) {<span class="line" [class.active]="line.line === activeLine()">{{ line.text || ' ' }}</span>}</code></pre>
+  </figure>
+}
+
+@if (diagramBoard(); as board) {
+  <figure class="diagram">
+    @if (board.title) {
+      <figcaption>{{ board.title }}</figcaption>
+    }
+    <svg [attr.viewBox]="viewBox()" [attr.height]="diagramHeight()" width="100%" role="img">
+      <defs>
+        <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5"
+                markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 0 L 10 5 L 0 10 z" class="arrowhead" />
+        </marker>
+      </defs>
+
+      @for (edge of diagramEdges(); track edge.path) {
+        <path [attr.d]="edge.path" class="edge" marker-end="url(#arrow)" />
+        @if (edge.label) {
+          <text [attr.x]="edge.labelX" [attr.y]="edge.labelY" class="edge-label">{{ edge.label }}</text>
+        }
+      }
+
+      @for (node of diagramNodes(); track node.id) {
+        <g class="node">
+          <rect [attr.x]="node.x - nodeWidth / 2" [attr.y]="node.y - nodeHeight / 2"
+                [attr.width]="nodeWidth" [attr.height]="nodeHeight" rx="8" />
+          <text [attr.x]="node.x" [attr.y]="node.y">{{ node.label }}</text>
+        </g>
+      }
+    </svg>
+  </figure>
+}
+
+@if (chartBoard(); as board) {
+  <figure class="chart">
+    @if (board.title) {
+      <figcaption>{{ board.title }}</figcaption>
+    }
+    <svg [attr.viewBox]="chartViewBox" width="100%" height="260" role="img">
+      <line x1="0" [attr.y1]="chartBaseline" [attr.x2]="chartWidth" [attr.y2]="chartBaseline" class="axis" />
+      <text x="0" y="16" class="peak">peak {{ chartPeak() }}</text>
+      @if (board.kind === 'line') {
+        <path [attr.d]="linePath()" class="series-line" />
+      }
+      @for (bar of bars(); track bar.label) {
+        @if (board.kind === 'bar') {
+          <rect [attr.x]="bar.x" [attr.y]="bar.y" [attr.width]="bar.width" [attr.height]="bar.height" rx="3" class="bar" />
+        } @else {
+          <circle [attr.cx]="bar.x + bar.width / 2" [attr.cy]="bar.y" r="5" class="dot" />
+        }
+        <text [attr.x]="bar.x + bar.width / 2" [attr.y]="bar.y - 8" class="value">{{ bar.value }}</text>
+        <text [attr.x]="bar.x + bar.width / 2" [attr.y]="248" class="tick">{{ bar.label }}</text>
+      }
+    </svg>
+  </figure>
+}
+
+@if (mathBoard(); as board) {
+  <figure class="math">
+    @if (renderedMath()) {
+      <div [innerHTML]="renderedMath()"></div>
+    } @else {
+      <pre>{{ board.latex }}</pre>
+    }
+    @if (board.caption) {
+      <figcaption>{{ board.caption }}</figcaption>
+    }
+  </figure>
+}
+
+@if (!tool()) {
+  <div class="quiet" aria-hidden="true"></div>
+}

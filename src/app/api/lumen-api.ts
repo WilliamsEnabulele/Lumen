@@ -1,11 +1,6 @@
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
-import {
-  CourseSummary,
-  GroundedAnswer,
-  IngestionStatus,
-  LessonScriptResponse,
-} from 'domain';
+import { IngestionStatus, SessionStarted, TurnTaken } from 'domain';
 import { Observable, catchError, throwError } from 'rxjs';
 
 /** Everything the student app asks the backend for. One place, so the contract has one owner. */
@@ -18,7 +13,7 @@ export class LumenApi {
     return this.http.get<{ supported: string[] }>(`${this.base}/formats`).pipe(catchError(readable));
   }
 
-  /** Hands the document over. The lesson is built in the background; poll `status`. */
+  /** Hands the document over. The model reads it in the background; poll `status`. */
   upload(file: File): Observable<IngestionStatus> {
     const body = new FormData();
     body.append('file', file, file.name);
@@ -31,19 +26,19 @@ export class LumenApi {
       .pipe(catchError(readable));
   }
 
-  course(courseId: string): Observable<CourseSummary> {
-    return this.http.get<CourseSummary>(`${this.base}/courses/${courseId}`).pipe(catchError(readable));
-  }
-
-  script(lessonId: string): Observable<LessonScriptResponse> {
+  startSession(courseId: string): Observable<SessionStarted> {
     return this.http
-      .get<LessonScriptResponse>(`${this.base}/lessons/${lessonId}/script`)
+      .post<SessionStarted>(`${this.base}/sessions`, { courseId })
       .pipe(catchError(readable));
   }
 
-  ask(lessonId: string, question: string, currentNodeId: string | null): Observable<GroundedAnswer> {
+  /**
+   * One turn of the conversation. `said` is what the student just said, or null when the tutor
+   * is simply carrying on — the server decides what the turn is for either way.
+   */
+  turn(sessionId: string, said: string | null): Observable<TurnTaken> {
     return this.http
-      .post<GroundedAnswer>(`${this.base}/lessons/${lessonId}/ask`, { question, currentNodeId })
+      .post<TurnTaken>(`${this.base}/sessions/${sessionId}/turn`, { said })
       .pipe(catchError(readable));
   }
 }
