@@ -22,7 +22,9 @@
       @if (started()) {
         <p class="cue">
           @switch (orbMode()) {
-            @case ('listening') { Listening — go ahead }
+            @case ('listening') {
+              @if (session.awaitingAnswer()) { Your turn — take your time } @else { Listening — go ahead }
+            }
             @case ('thinking') { Thinking }
             @case ('speaking') { Cut in whenever you like }
             @default { Waiting }
@@ -46,6 +48,16 @@
         </div>
       } @else {
         <lumen-tutor-canvas [canvas]="canvas()" [progress]="progress()" />
+
+        @if (marked(); as verdict) {
+          <p class="marked" [class]="'verdict-' + verdict.verdict.toLowerCase()">
+            <span class="badge">{{ verdict.verdict }}</span> {{ verdict.reason }}
+          </p>
+        }
+
+        @for (note of movedOn(); track note) {
+          <p class="moved">{{ note }}</p>
+        }
 
         @if (degraded()) {
           <p class="degraded">

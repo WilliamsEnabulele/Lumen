@@ -182,3 +182,39 @@
   background: transparent;
   border-color: var(--border-strong);
 }
+
+/* What just happened to the student's standing, in the student's words. A mastery estimate
+   that moves invisibly is one nobody can argue with, and being moved past a concept without
+   being told is the thing that makes a tutor feel like it stopped paying attention. */
+.marked {
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
+  margin: 0.75rem 0 0;
+  font-size: 0.9rem;
+  color: var(--ink-muted);
+
+  .badge {
+    flex: none;
+    padding: 0.1rem 0.5rem;
+    border-radius: 999px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    background: color-mix(in oklab, var(--ink-muted) 18%, transparent);
+    color: var(--ink);
+  }
+
+  &.verdict-correct .badge { background: color-mix(in oklab, #2f9e63 26%, transparent); }
+  &.verdict-partial .badge { background: color-mix(in oklab, #c88a1e 26%, transparent); }
+  &.verdict-incorrect .badge { background: color-mix(in oklab, #c4543e 26%, transparent); }
+  &.verdict-noanswer .badge { opacity: 0.7; }
+}
+
+.moved {
+  margin: 0.4rem 0 0;
+  font-size: 0.85rem;
+  font-style: italic;
+  color: var(--ink-muted);
+}

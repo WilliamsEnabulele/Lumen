@@ -9,6 +9,16 @@ import { OrbMode, VoiceOrb } from './voice-orb';
 /** How long to wait for something intelligible before calling it a cough and carrying on. */
 const FALSE_POSITIVE_WINDOW_MS = 1200;
 
+/**
+ * How long to hold the silence after asking a question.
+ *
+ * Long by the standards of a chat interface and about right for a room. Thinking out loud
+ * takes time, and a tutor that fills a ten-second pause has taught the student that pausing
+ * is not allowed. When it does run out, silence goes to the server as silence — which is
+ * marked as no answer, costs nothing, and gets them taught rather than failed.
+ */
+const ANSWER_PATIENCE_MS = 12_000;
+
 type Recognition = {
   lang: string;
   interimResults: boolean;
@@ -63,8 +73,13 @@ export class Tutor implements OnDestroy {
   /** True when no model is configured, so the degraded mode is visible rather than silent. */
   readonly degraded = computed(() => this.session.tutorName().startsWith('scripted'));
 
+  /** What just happened to the lesson's position, when it was not simply the next concept. */
+  readonly marked = this.session.marked;
+  readonly movedOn = this.session.movedOn;
+
   private sessionId: string | null = null;
   private falsePositiveTimer: ReturnType<typeof setTimeout> | null = null;
+  private answerTimer: ReturnType<typeof setTimeout> | null = null;
   private recognition: Recognition | null = null;
 
   constructor() {
@@ -139,6 +154,7 @@ export class Tutor implements OnDestroy {
   private nextTurn(said: string | null): void {
     if (!this.sessionId || this.state() === 'complete') return;
 
+    this.clearTimer();
     this.session.moveTo('thinking');
     this.detector.setTutorSpeaking(false);
 
@@ -171,10 +187,35 @@ export class Tutor implements OnDestroy {
       onFinished: () => {
         this.detector.setTutorSpeaking(false);
         if (this.state() === 'complete') return;
-        // Silence from the student is itself an answer: carry on.
+
+        // A question was asked. Stop and wait — this is the pause the lesson is for.
+        if (this.session.awaitingAnswer()) {
+          this.awaitAnswer();
+          return;
+        }
+
+        // Otherwise silence from the student is itself an answer: carry on.
         this.nextTurn(null);
       },
     });
+  }
+
+  /**
+   * Holds the silence after a check, then gives up gracefully.
+   *
+   * Giving up matters as much as waiting. A student who says nothing must not leave the tutor
+   * sitting there forever, and must not be marked down for it either — silence goes to the
+   * server as silence, and the server knows what that is worth.
+   */
+  private awaitAnswer(): void {
+    this.session.moveTo('listening');
+    this.listen();
+
+    this.answerTimer = setTimeout(() => {
+      if (this.state() !== 'listening') return;
+      this.stopListening();
+      this.nextTurn(null);
+    }, ANSWER_PATIENCE_MS);
   }
 
   private listen(): void {
@@ -211,6 +252,10 @@ export class Tutor implements OnDestroy {
     if (this.falsePositiveTimer !== null) {
       clearTimeout(this.falsePositiveTimer);
       this.falsePositiveTimer = null;
+    }
+    if (this.answerTimer !== null) {
+      clearTimeout(this.answerTimer);
+      this.answerTimer = null;
     }
   }
 }

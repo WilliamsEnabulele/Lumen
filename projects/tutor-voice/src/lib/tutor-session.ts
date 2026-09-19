@@ -1,5 +1,5 @@
 import { Injectable, computed, signal } from '@angular/core';
-import { Canvas, CanvasCommand, TurnTaken, applyToCanvas, snapBack } from 'domain';
+import { Canvas, CanvasCommand, MarkedAnswer, TurnTaken, applyToCanvas, snapBack } from 'domain';
 
 export type TutorState = 'idle' | 'thinking' | 'teaching' | 'listening' | 'complete';
 
@@ -21,12 +21,26 @@ export class TutorSession {
   private readonly _spokenTo = signal(0);
   private readonly _canvas = signal<Canvas>(null);
   private readonly _heardUpTo = signal(0);
+  private readonly _awaitingAnswer = signal(false);
 
   readonly state = this._state.asReadonly();
   /** The turn currently being spoken. */
   readonly said = this._said.asReadonly();
   readonly spokenTo = this._spokenTo.asReadonly();
   readonly canvas = this._canvas.asReadonly();
+
+  /**
+   * A question is hanging. Everything about how this turn ends changes on it: the tutor stops
+   * rather than rolling into the next explanation, and what the student says next is an answer
+   * rather than an interruption.
+   */
+  readonly awaitingAnswer = this._awaitingAnswer.asReadonly();
+
+  /** How the last answer was marked. Null on the turns where nothing was asked. */
+  readonly marked = signal<MarkedAnswer | null>(null);
+
+  /** Concepts the lesson moved past without teaching them here, and why. Never silent. */
+  readonly movedOn = signal<readonly string[]>([]);
 
   readonly lessonTitle = signal('');
   readonly conceptTitle = signal('');
@@ -58,9 +72,16 @@ export class TutorSession {
 
     for (const command of turn.drew) this.draw(command);
 
+    this.marked.set(turn.marked ?? null);
+    this.movedOn.set([
+      ...(turn.skipped ?? []).map((title) => `Skipped ${title} — you have already shown me that one`),
+      ...(turn.abandoned ? [`Moved on from ${turn.abandoned} for now`] : []),
+    ]);
+
     this._said.set(turn.said);
     this._spokenTo.set(0);
     this._heardUpTo.set(0);
+    this._awaitingAnswer.set(turn.awaitingAnswer === true);
     this._state.set(turn.complete ? 'complete' : 'teaching');
   }
 
@@ -103,6 +124,9 @@ export class TutorSession {
     this._spokenTo.set(0);
     this._heardUpTo.set(0);
     this._canvas.set(null);
+    this._awaitingAnswer.set(false);
+    this.marked.set(null);
+    this.movedOn.set([]);
     this.interruptions.set(0);
   }
 }

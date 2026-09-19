@@ -1,16 +1,21 @@
 import { TurnTaken } from 'domain';
 import { TutorSession } from './tutor-session';
 
-function turn(said: string, drew: TurnTaken['drew'] = [], complete = false): TurnTaken {
+function turn(said: string, drew: TurnTaken['drew'] = [], over: Partial<TurnTaken> = {}): TurnTaken {
   return {
     said,
     drew,
     conceptComplete: false,
-    complete,
+    complete: false,
     lessonTitle: 'Loops',
     conceptTitle: 'Nesting',
     sourceRef: 'ch4:p63',
     tutor: 'anthropic:claude-opus-5',
+    awaitingAnswer: false,
+    marked: null,
+    skipped: [],
+    abandoned: null,
+    ...over,
   };
 }
 
@@ -74,9 +79,40 @@ describe('TutorSession', () => {
   });
 
   it('a finished course ends the session rather than asking for another turn', () => {
-    session.beginTurn(turn('That is the lot.', [], true));
+    session.beginTurn(turn('That is the lot.', [], { complete: true }));
 
     expect(session.state()).toBe('complete');
+  });
+
+  it('a turn that asked a question is waiting for an answer to it', () => {
+    session.beginTurn(turn('So how many times does it run?', [], { awaitingAnswer: true }));
+
+    expect(session.awaitingAnswer()).toBeTrue();
+  });
+
+  it('the question stops being open once the next turn arrives', () => {
+    session.beginTurn(turn('So how many times does it run?', [], { awaitingAnswer: true }));
+    session.beginTurn(turn('Right — five.'));
+
+    expect(session.awaitingAnswer()).toBeFalse();
+  });
+
+  it('a mark is shown on the turn it arrives and no longer', () => {
+    session.beginTurn(turn('Not quite.', [], {
+      marked: { verdict: 'Incorrect', reason: 'Wrong answer — come at it from a different angle.' },
+    }));
+    expect(session.marked()?.verdict).toBe('Incorrect');
+
+    session.beginTurn(turn('Try it this way.'));
+    expect(session.marked()).toBeNull();
+  });
+
+  it('jumping the lesson is never silent', () => {
+    session.beginTurn(turn('Right, onward.', [], { skipped: ['Counted loops'], abandoned: 'Off-by-one' }));
+
+    expect(session.movedOn().length).toBe(2);
+    expect(session.movedOn()[0]).toContain('Counted loops');
+    expect(session.movedOn()[1]).toContain('Off-by-one');
   });
 
   it('progress cannot run past the end of the turn', () => {
