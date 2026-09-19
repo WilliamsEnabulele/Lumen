@@ -29,6 +29,15 @@ export interface InterjectionSlot {
   readonly function: InterjectionFunction;
 }
 
+/**
+ * How the canvas moves while a node is spoken.
+ *
+ * A visual is a behaviour, not a picture: the client advances it from the utterance offset it
+ * is already tracking, so an interrupted node resumes its illustration at the same frame
+ * rather than restarting. These names mirror the backend enum exactly.
+ */
+export type VisualKind = 'None' | 'Code' | 'Steps' | 'Compare' | 'Counter' | 'Statement';
+
 export interface ScriptNode {
   readonly id: string;
   readonly lessonId: string;
@@ -40,6 +49,9 @@ export interface ScriptNode {
   readonly ssml?: string;
   readonly pauseAfterMs: number;
   readonly visualRef?: string;
+  readonly visualKind: VisualKind;
+  /** Read according to `visualKind`: source for Code, one line per point for Steps. */
+  readonly visualPayload?: string;
   readonly sourceRef?: string;
   readonly carriesDefinition: boolean;
   readonly interjectionSlots: readonly InterjectionSlot[];

@@ -3,6 +3,7 @@
  * Everything here mirrors the backend domain deliberately — see each file for why.
  */
 export * from './lib/script-node';
+export * from './lib/api-contract';
 export * from './lib/resume-pointer';
 export * from './lib/utterance-boundary';
 export * from './lib/tutor-state';

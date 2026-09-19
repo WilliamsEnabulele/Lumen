@@ -42,6 +42,10 @@
 * { box-sizing: border-box; }
 
 html, body {
+  /* The tutor view is a room, not a document: it fills the viewport and its footer sits at
+     the bottom. Without an explicit height the flex column collapses to its content and
+     leaves a dead band under the fold. */
+  height: 100%;
   margin: 0;
   background: var(--ground);
   color: var(--ink);
@@ -73,3 +77,16 @@ button {
 }
 
 input:focus-visible { outline: 2px solid var(--student); outline-offset: 1px; }
+
+/* A percentage min-height cannot resolve against an auto-height parent, so the chain from
+   body down to the tutor view is flex instead: each link grows to fill the one above it. */
+body {
+  display: flex;
+  flex-direction: column;
+}
+
+app-root {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}

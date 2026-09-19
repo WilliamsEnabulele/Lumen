@@ -48,7 +48,8 @@ question, and then picks up exactly where it left off.
 |---|---|
 | `projects/domain` | The rules the client and server both hold: the resume pointer, where an interrupted utterance re-enters, the session state machine, the register ladder |
 | `projects/tutor-voice` | The client half of the tutor: the microphone gate that decides to stop, speech output that knows where it got to, and the session that holds the pointer |
-| `src/app/lesson` | The student's view — canvas, pointer readout, and the instrumentation the corridor test argued for |
+| `src/app/upload` | Hand over a document and watch it become a lesson |
+| `src/app/tutor` | Being taught: the voice orb, the animated concept canvas, captions, and interrupting |
 | `prototypes/corridor-test` | The original single-file rig. Kept because it is the cheapest way to re-ask the only question that matters |
 
 The backend is a separate repository: **[WilliamsEnabulele/Lumen-BE](https://github.com/WilliamsEnabulele/Lumen-BE)**.
@@ -63,12 +64,28 @@ decided. The duplication is kept honest by holding both to the same test cases.
 ```bash
 npm install
 npm run build:libs   # libraries first; the app consumes them from dist
-npm start            # the student app on :4200
+npm start            # the student app on :4200, proxying /api to the backend on :5299
 npm test             # domain, tutor-voice, then the app
 ```
 
-Tests run in headless Chromium. The lesson is currently a fixture in `LessonGateway` — every
-method there is a stand-in for an endpoint the backend does not serve yet, and each is marked.
+Run the backend from [Lumen-BE](https://github.com/WilliamsEnabulele/Lumen-BE) alongside it —
+`dotnet run --project Lumen.Api`. Tests run in headless Chromium.
+
+## The flow
+
+1. **Hand over a document.** Markdown, plain text, DOCX or PPTX. It goes to the backend, which
+   reads it, works out what it teaches, and writes the script.
+2. **Wait, honestly.** Stages, not an invented percentage: reading the document, working out
+   what it teaches, writing the lesson.
+3. **Be taught.** The tutor speaks. The orb shows whether it is talking, listening or working
+   something out. The canvas animates against the speech — code with the line being discussed
+   lit, points arriving as they are said.
+4. **Cut in whenever.** Start talking and it stops. Ask, and the answer comes from the lesson
+   with the passage it came from named — or is declared out of scope rather than guessed at.
+   Then it picks up where it left off, mid-sentence, with the canvas at the same frame.
+
+Without a microphone, typing reaches exactly the same path. Without a speech voice installed,
+the lesson still runs as paced captions rather than racing past.
 
 ## Stack
 

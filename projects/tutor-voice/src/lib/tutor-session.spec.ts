@@ -12,6 +12,7 @@ function node(id: string, ordinal: number, text: string, visualRef?: string): Sc
     pauseAfterMs: 300,
     visualRef,
     carriesDefinition: false,
+    visualKind: visualRef ? 'Code' : 'None',
     interjectionSlots: [],
   };
 }
@@ -63,7 +64,7 @@ describe('TutorSession', () => {
   it('restores the canvas as well as the speech', () => {
     session.beginTeaching();
     session.nodeComplete();
-    session.progress(10);
+    session.noteProgress(10);
 
     session.bargeIn(10);
     const instruction = session.resume();
@@ -93,6 +94,15 @@ describe('TutorSession', () => {
     expect(instruction.node.id).toBe('n01');
   });
 
+  it('tracks progress through the node, which is what the canvas animates against', () => {
+    session.beginTeaching();
+    const node = session.currentNode()!;
+
+    expect(session.progress()).toBe(0);
+    session.noteProgress(Math.floor(node.text.length / 2));
+    expect(session.progress()).toBeCloseTo(0.5, 1);
+  });
+
   it('advances node by node and then finishes', () => {
     session.beginTeaching();
     expect(session.nodeComplete()?.id).toBe('n02');
@@ -103,7 +113,7 @@ describe('TutorSession', () => {
 
   it('survives a pause and comes back to the same place', () => {
     session.beginTeaching();
-    session.progress(18);
+    session.noteProgress(18);
     const saved = session.pause();
 
     expect(session.state()).toBe('paused');

@@ -1,0 +1,197 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.centred {
+  margin: auto;
+  text-align: center;
+  padding: 48px 16px;
+
+  h2 {
+    font-family: var(--serif);
+    font-weight: 400;
+    font-size: 22px;
+    margin: 0 0 8px;
+  }
+}
+.quiet { color: var(--ink-muted); margin: 0; }
+.small { font-size: 13px; }
+
+/* ---- bar ---- */
+.bar {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 18px 24px;
+  border-bottom: 1px solid var(--border);
+
+  .titles { margin-right: auto; }
+
+  .course {
+    display: block;
+    font-family: var(--mono);
+    font-size: 10.5px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin-bottom: 4px;
+  }
+
+  h1 {
+    font-family: var(--serif);
+    font-size: 19px;
+    font-weight: 400;
+    margin: 0;
+    letter-spacing: -0.005em;
+  }
+}
+
+/* ---- the room ---- */
+.room {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: 40px;
+  align-items: center;
+  padding: 48px 32px;
+  max-width: 1100px;
+  width: 100%;
+  margin: 0 auto;
+
+  @media (max-width: 860px) {
+    grid-template-columns: 1fr;
+    gap: 28px;
+    padding: 32px 16px;
+    align-items: start;
+  }
+}
+
+.presence {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+
+  @media (max-width: 860px) {
+    lumen-voice-orb { max-width: 120px; }
+  }
+}
+
+.cue {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  color: var(--ink-faint);
+  margin: 0;
+  text-align: center;
+  max-width: 18ch;
+  line-height: 1.5;
+}
+
+.canvas { min-width: 0; }
+
+.opening {
+  max-width: 44ch;
+
+  h2 {
+    font-family: var(--serif);
+    font-size: 28px;
+    font-weight: 400;
+    letter-spacing: -0.015em;
+    margin: 0 0 12px;
+    text-wrap: balance;
+  }
+
+  p {
+    color: var(--ink-muted);
+    line-height: 1.6;
+    margin: 0 0 22px;
+    text-wrap: pretty;
+  }
+}
+
+/* ---- an answer to an interruption ---- */
+.answer {
+  margin-top: 26px;
+  border-left: 3px solid var(--student);
+  padding: 14px 18px;
+  background: var(--student-bg);
+  border-radius: 0 8px 8px 0;
+
+  p {
+    margin: 0;
+    font-family: var(--serif);
+    font-size: 17px;
+    line-height: 1.55;
+  }
+
+  &.out-of-scope {
+    border-left-color: var(--ink-faint);
+    background: var(--surface-2);
+  }
+}
+
+.cite {
+  display: inline-block;
+  margin-top: 10px;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.06em;
+  color: var(--ink-muted);
+}
+
+.aside {
+  margin: 18px 0 0;
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--ink-faint);
+}
+
+/* ---- caption + ask ---- */
+.caption {
+  border-top: 1px solid var(--border);
+  padding: 16px 24px calc(16px + env(safe-area-inset-bottom, 0px));
+  background: var(--surface);
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.said {
+  flex: 1 1 320px;
+  margin: 0;
+  font-family: var(--serif);
+  font-size: 15px;
+  line-height: 1.5;
+  max-height: 3em;
+  overflow: hidden;
+
+  .spoken { color: var(--ink); }
+  .ahead { color: var(--ink-faint); }
+}
+
+.ask {
+  display: flex;
+  gap: 8px;
+  flex: 0 1 340px;
+
+  input {
+    flex: 1;
+    min-width: 0;
+    font-family: var(--sans);
+    font-size: 14px;
+    padding: 8px 12px;
+    border: 1px solid var(--border-strong);
+    border-radius: 8px;
+    background: var(--ground);
+    color: var(--ink);
+  }
+}
+
+.ghost {
+  background: transparent;
+  border-color: var(--border-strong);
+}

@@ -1,10 +1,12 @@
 import { ApplicationConfig, provideBrowserGlobalErrorListeners, provideZoneChangeDetection } from '@angular/core';
+import { provideHttpClient } from '@angular/common/http';
 
-// No router yet: there is one view, and it is the lesson. Routing arrives with the course
-// list and the instructor console, not before.
+// No router yet: the app is one flow — hand over a document, then be taught. Routing arrives
+// with a course library and an instructor console, not before.
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
     provideZoneChangeDetection({ eventCoalescing: true }),
+    provideHttpClient(),
   ],
 };

@@ -1,0 +1,48 @@
+<section class="stage">
+  @if (!status() && !error()) {
+    <div
+      class="drop"
+      [class.over]="dragging()"
+      (dragover)="onDragOver($event)"
+      (dragleave)="onDragLeave()"
+      (drop)="onDrop($event)">
+      <h1>Hand over something to learn</h1>
+      <p class="lede">
+        Drop in a chapter, a set of notes or a deck. Lumen reads it, works out what it teaches,
+        and then teaches it to you out loud — and you can stop it and ask at any point.
+      </p>
+
+      <label class="pick">
+        <input type="file" (change)="onPick($event)" hidden />
+        <span>Choose a document</span>
+      </label>
+
+      @if (formats().length) {
+        <p class="formats">{{ formats().join('  ·  ') }}</p>
+      }
+    </div>
+  }
+
+  @if (status(); as current) {
+    @if (!current.failed) {
+      <div class="preparing">
+        <div class="pulse" [attr.data-stage]="current.stage">
+          <span></span><span></span><span></span>
+        </div>
+        <h2>{{ current.message }}</h2>
+        <p class="file">{{ fileName() }}</p>
+        @if (current.words) {
+          <p class="detail">{{ current.words }} words read</p>
+        }
+      </div>
+    }
+  }
+
+  @if (error(); as message) {
+    <div class="failed">
+      <h2>That did not work</h2>
+      <p>{{ message }}</p>
+      <button class="primary" (click)="retry()">Try another document</button>
+    </div>
+  }
+</section>

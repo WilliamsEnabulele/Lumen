@@ -12,6 +12,7 @@ function nodeWithCode(): ScriptNode {
     pauseAfterMs: 400,
     visualRef: 'loops-nested',
     carriesDefinition: false,
+    visualKind: 'Code',
     interjectionSlots: [],
   };
 }

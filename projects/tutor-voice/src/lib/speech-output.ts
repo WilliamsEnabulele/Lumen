@@ -34,8 +34,15 @@ export class SpeechOutput {
    */
   static readonly MaxBufferAheadMs = 250;
 
+  /**
+   * How long to wait past the expected end of an utterance before assuming the speech engine
+   * is not going to tell us it finished.
+   */
+  static readonly WatchdogGraceMs = 1500;
+
   private progress: UtteranceProgress | null = null;
   private estimator: ReturnType<typeof setInterval> | null = null;
+  private watchdog: ReturnType<typeof setTimeout> | null = null;
   private cancelled = false;
 
   private get synthesis(): SpeechSynthesis | null {
@@ -63,10 +70,14 @@ export class SpeechOutput {
     this.progress = new UtteranceProgress(text, from);
     this._speaking = true;
 
-    if (!synthesis) {
-      // No speech engine: report completion so the lesson still advances in text-only mode.
-      this._speaking = false;
-      options.onFinished?.();
+    // A browser with no installed voice — a headless one, a stripped container, some Linux
+    // desktops — reports an error the instant it is asked to speak. Treating that as "the
+    // utterance finished" races the whole lesson past the student in a second, which is a
+    // worse failure than silence. Text mode is still a *paced* lesson: the captions advance at
+    // reading speed and the canvas animates with them, which is the graceful degradation the
+    // spec asks for rather than a broken one.
+    if (!synthesis || synthesis.getVoices().length === 0) {
+      this.simulate(text, from, rate, options);
       return;
     }
 
@@ -87,19 +98,30 @@ export class SpeechOutput {
       options.onProgress?.(offset);
     }, 120);
 
-    utterance.onend = () => {
+    const finish = () => {
       this.clearEstimator();
-      if (this.cancelled) return;
+      this.clearWatchdog();
+      if (this.cancelled || !this._speaking) return;
       this._speaking = false;
       const offset = this.progress?.complete() ?? text.length;
       options.onProgress?.(offset);
       options.onFinished?.();
     };
 
+    utterance.onend = finish;
+
     utterance.onerror = () => {
-      this.clearEstimator();
-      this._speaking = false;
+      // A device with no installed voice reports an error rather than speaking. The lesson
+      // still has to move, so this degrades to text with the captions doing the work.
+      finish();
     };
+
+    // Some engines neither speak nor report anything — a headless browser, a device with no
+    // voice pack, a tab the platform has quietly muted. Without this the lesson stops forever
+    // on node one, which is the worst possible failure: silent, and indistinguishable from
+    // the tutor thinking.
+    const expectedMs = ((text.length - from) / (14 * rate)) * 1000;
+    this.watchdog = setTimeout(finish, expectedMs + SpeechOutput.WatchdogGraceMs);
 
     synthesis.speak(utterance);
   }
@@ -110,8 +132,38 @@ export class SpeechOutput {
     this.cancelled = true;
     this._speaking = false;
     this.clearEstimator();
+    this.clearWatchdog();
     this.synthesis?.cancel();
     return offset;
+  }
+
+  /**
+   * Text mode: no audio, but the lesson still moves at the speed someone reads it. Everything
+   * downstream — the resume pointer, the canvas animation, barge-in — works off the same
+   * offset it would during speech, so nothing else has to know the difference.
+   */
+  private simulate(text: string, from: number, rate: number, options: SpeakOptions): void {
+    const startedAt = Date.now();
+
+    this.estimator = setInterval(() => {
+      if (!this._speaking || !this.progress) return;
+
+      const offset = this.progress.onElapsed(Date.now() - startedAt, rate);
+      options.onProgress?.(offset);
+
+      if (offset < text.length) return;
+
+      this.clearEstimator();
+      this._speaking = false;
+      options.onFinished?.();
+    }, 120);
+  }
+
+  private clearWatchdog(): void {
+    if (this.watchdog !== null) {
+      clearTimeout(this.watchdog);
+      this.watchdog = null;
+    }
   }
 
   private clearEstimator(): void {

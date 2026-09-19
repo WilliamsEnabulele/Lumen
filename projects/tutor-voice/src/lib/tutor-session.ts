@@ -51,6 +51,20 @@ export class TutorSession {
     return script.nodes.find((node) => node.id === pointer.scriptNodeId) ?? null;
   });
 
+  /**
+   * How far through the current node's speech we are, 0 to 1.
+   *
+   * This is what the canvas animates against. Keying the illustration to the same offset the
+   * resume pointer uses is what makes an interrupted node come back at the frame it left —
+   * the words and the picture cannot drift apart because they are reading the same number.
+   */
+  readonly progress = computed(() => {
+    const node = this.currentNode();
+    const pointer = this._pointer();
+    if (!node || !pointer || node.text.length === 0) return 0;
+    return Math.min(1, pointer.utteranceOffset / node.text.length);
+  });
+
   /** Instrumentation, because the corridor test's question outlives the corridor test. */
   readonly interruptions = signal(0);
   readonly falsePositives = signal(0);
@@ -80,7 +94,7 @@ export class TutorSession {
    * seconds a node that is a trivial write rate, and it bounds the worst case to one node of
    * lost progress, which is the amount a student forgives without noticing.
    */
-  progress(utteranceOffset: number): ResumePointer {
+  noteProgress(utteranceOffset: number): ResumePointer {
     const pointer = heldAt(this.requirePointer(), utteranceOffset);
     this._pointer.set(pointer);
     return pointer;
