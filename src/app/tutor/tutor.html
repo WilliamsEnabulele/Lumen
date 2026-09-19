@@ -14,7 +14,18 @@
     @if (started() && session.conceptTitle()) {
       <span class="concept">{{ session.conceptTitle() }}</span>
     }
+    @if (started()) {
+      <button class="ghost small" (click)="toggleStanding()" [attr.aria-expanded]="standingOpen()">
+        {{ standingOpen() ? 'Hide what you have shown' : 'What you have shown' }}
+      </button>
+    }
   </header>
+
+  @if (standingOpen()) {
+    <section class="standing">
+      <lumen-concept-progress [progress]="standing() ?? []" [loading]="loadingStanding()" />
+    </section>
+  }
 
   <main class="room">
     <div class="presence">
@@ -66,7 +77,9 @@
         }
 
         @if (state() === 'complete') {
-          <p class="done">That is the end of the course.</p>
+          <p class="done">
+            That is the end of the course. What you showed along the way is above.
+          </p>
         }
       }
     </div>

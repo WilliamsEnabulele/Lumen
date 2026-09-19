@@ -1,8 +1,9 @@
 import { Component, OnDestroy, computed, inject, input, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { SessionStarted } from 'domain';
+import { ConceptProgress, SessionStarted } from 'domain';
 import { BargeInDetector, SpeechOutput, TutorSession } from 'tutor-voice';
 import { LumenApi } from '../api/lumen-api';
+import { ConceptProgressPanel } from '../progress/concept-progress';
 import { TutorCanvas } from './tutor-canvas';
 import { OrbMode, VoiceOrb } from './voice-orb';
 
@@ -31,7 +32,7 @@ type Recognition = {
 
 @Component({
   selector: 'lumen-tutor',
-  imports: [FormsModule, VoiceOrb, TutorCanvas],
+  imports: [FormsModule, VoiceOrb, TutorCanvas, ConceptProgressPanel],
   templateUrl: './tutor.html',
   styleUrl: './tutor.scss',
 })
@@ -76,6 +77,15 @@ export class Tutor implements OnDestroy {
   /** What just happened to the lesson's position, when it was not simply the next concept. */
   readonly marked = this.session.marked;
   readonly movedOn = this.session.movedOn;
+
+  /**
+   * What the server believes the student knows. Fetched on demand rather than kept in step
+   * every turn: it is a report, not part of the conversation, and polling it while someone is
+   * being taught spends requests on a panel nobody has opened.
+   */
+  readonly standing = signal<readonly ConceptProgress[] | null>(null);
+  readonly standingOpen = signal(false);
+  readonly loadingStanding = signal(false);
 
   private sessionId: string | null = null;
   private falsePositiveTimer: ReturnType<typeof setTimeout> | null = null;
@@ -128,6 +138,35 @@ export class Tutor implements OnDestroy {
     }, FALSE_POSITIVE_WINDOW_MS);
   }
 
+  /**
+   * Opens the progress panel, refreshing it each time.
+   *
+   * Refreshed on open because it goes stale the moment an answer is marked, and a panel
+   * showing what the student knew four questions ago is worse than one that takes a beat.
+   */
+  toggleStanding(): void {
+    const opening = !this.standingOpen();
+    this.standingOpen.set(opening);
+    if (opening) this.refreshStanding();
+  }
+
+  private refreshStanding(): void {
+    if (!this.sessionId) return;
+
+    this.loadingStanding.set(this.standing() === null);
+
+    this.api.progress(this.sessionId).subscribe({
+      next: (progress) => {
+        this.standing.set(progress);
+        this.loadingStanding.set(false);
+      },
+      error: () => {
+        // A report that will not load must not take the lesson down with it.
+        this.loadingStanding.set(false);
+      },
+    });
+  }
+
   ask(): void {
     const asked = this.question().trim();
     if (!asked) return;
@@ -161,6 +200,16 @@ export class Tutor implements OnDestroy {
     this.api.turn(this.sessionId, said).subscribe({
       next: (turn) => {
         this.session.beginTurn(turn);
+
+        // A marked answer moves the belief, so anything on screen is now wrong. The end of the
+        // course is the one moment this is worth showing unasked.
+        if (turn.complete) {
+          this.standingOpen.set(true);
+          this.refreshStanding();
+        } else if (turn.marked && this.standingOpen()) {
+          this.refreshStanding();
+        }
+
         if (turn.complete && !turn.said) return;
         this.speakCurrentTurn(0);
       },

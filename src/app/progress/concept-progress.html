@@ -1,0 +1,56 @@
+@if (loading()) {
+  <p class="quiet">Looking up what you have shown so far…</p>
+} @else if (progress().length === 0) {
+  <p class="quiet">
+    Nothing has been asked yet. This fills in as you answer — it is built from your answers,
+    not from how much of the lesson has gone by.
+  </p>
+} @else {
+  <p class="summary">
+    {{ shown() }} of {{ progress().length }} concepts shown, over
+    {{ answered() }} {{ answered() === 1 ? 'answer' : 'answers' }}.
+  </p>
+
+  @if (revisit().length > 0) {
+    <p class="revisit">
+      Worth coming back to: {{ revisit()[0].concept }}@if (revisit().length > 1) {
+        <span> and {{ revisit().length - 1 }} other{{ revisit().length > 2 ? 's' : '' }}</span>
+      }.
+    </p>
+  }
+
+  <ul class="concepts">
+    @for (row of standings(); track row.record.concept) {
+      <li [class]="'tone-' + row.standing.tone">
+        <details>
+          <summary>
+            <span class="name">{{ row.record.concept }}</span>
+            <span class="label">{{ row.standing.label }}</span>
+          </summary>
+
+          <p class="detail">{{ row.standing.detail }}</p>
+
+          <p class="belief">
+            The estimate stands at {{ percent(row.record.belief) }} out of 100. It is a belief
+            drawn from the answers below, not a mark.
+          </p>
+
+          @if (row.record.evidence.length > 0) {
+            <ol class="evidence">
+              @for (item of row.record.evidence; track item.at) {
+                <li>
+                  <span class="verdict">{{ verdictLabel(item.verdict) }}</span>
+                  <p class="asked">{{ item.question }}</p>
+                  <p class="said">“{{ item.answer }}”</p>
+                  @if (item.misconception) {
+                    <p class="misconception">Read as: {{ item.misconception }}</p>
+                  }
+                </li>
+              }
+            </ol>
+          }
+        </details>
+      </li>
+    }
+  </ul>
+}

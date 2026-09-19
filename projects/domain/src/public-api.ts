@@ -6,3 +6,4 @@ export * from './lib/canvas';
 export * from './lib/api-contract';
 export * from './lib/utterance-boundary';
 export * from './lib/register';
+export * from './lib/progress';

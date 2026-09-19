@@ -1,6 +1,6 @@
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
-import { IngestionStatus, SessionStarted, TurnTaken } from 'domain';
+import { ConceptProgress, IngestionStatus, SessionStarted, TurnTaken } from 'domain';
 import { Observable, catchError, throwError } from 'rxjs';
 
 /** Everything the student app asks the backend for. One place, so the contract has one owner. */
@@ -39,6 +39,19 @@ export class LumenApi {
   turn(sessionId: string, said: string | null): Observable<TurnTaken> {
     return this.http
       .post<TurnTaken>(`${this.base}/sessions/${sessionId}/turn`, { said })
+      .pipe(catchError(readable));
+  }
+
+  /**
+   * What the server believes the student knows, and the answers it believes it from.
+   *
+   * Fetched rather than accumulated on the client. The belief is computed server-side from
+   * every answer ever marked, and a second copy assembled here from the turns this tab
+   * happened to see would disagree with it the moment anyone reloads.
+   */
+  progress(sessionId: string): Observable<readonly ConceptProgress[]> {
+    return this.http
+      .get<readonly ConceptProgress[]>(`${this.base}/sessions/${sessionId}/progress`)
       .pipe(catchError(readable));
   }
 }

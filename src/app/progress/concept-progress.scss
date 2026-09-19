@@ -1,0 +1,128 @@
+:host {
+  display: block;
+  font-size: 14px;
+}
+
+.quiet {
+  margin: 0;
+  color: var(--ink-muted);
+  line-height: 1.55;
+}
+
+.summary {
+  margin: 0 0 4px;
+  font-family: var(--serif);
+  font-size: 15px;
+}
+
+.revisit {
+  margin: 0 0 16px;
+  color: var(--ink-muted);
+  font-size: 13px;
+}
+
+.concepts {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+
+  > li {
+    border-left: 3px solid var(--border-strong);
+    border-radius: 0 4px 4px 0;
+    background: var(--surface-2);
+
+    /* The tones are semantic: they say what to do next, not how well someone did. */
+    &.tone-shown { border-left-color: var(--student); }
+    &.tone-partial { border-left-color: var(--tutor); }
+    &.tone-shaky { border-left-color: var(--border-strong); }
+    &.tone-flagged { border-left-color: var(--critical); }
+    &.tone-unknown { border-left-color: var(--border); }
+  }
+}
+
+summary {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  padding: 10px 12px;
+  cursor: pointer;
+  list-style: none;
+
+  &::-webkit-details-marker { display: none; }
+
+  &::before {
+    content: '▸';
+    color: var(--ink-faint);
+    font-size: 10px;
+    transition: transform 120ms ease;
+  }
+
+  .name { flex: 1; }
+
+  .label {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+  }
+}
+
+details[open] > summary::before { transform: rotate(90deg); }
+
+.detail,
+.belief {
+  margin: 0 12px 8px;
+  color: var(--ink-muted);
+  line-height: 1.5;
+}
+
+.belief {
+  font-size: 12.5px;
+  color: var(--ink-faint);
+}
+
+.evidence {
+  list-style: none;
+  margin: 0 12px 12px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+
+  > li {
+    padding: 10px 12px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+  }
+
+  p { margin: 0; line-height: 1.5; }
+}
+
+.verdict {
+  display: inline-block;
+  margin-bottom: 4px;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+.asked { color: var(--ink-muted); font-size: 13px; }
+
+.said {
+  margin-top: 4px !important;
+  font-family: var(--serif);
+  color: var(--student);
+}
+
+.misconception {
+  margin-top: 6px !important;
+  font-size: 12.5px;
+  color: var(--critical);
+}
