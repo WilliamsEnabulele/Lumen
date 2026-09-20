@@ -1,0 +1,814 @@
+<title>Lumen</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Serif:ital,wght@0,400;0,500;1,400&display=swap">
+
+<style>
+  /* Tokens mirror the app's own: two voices, two colours, semantic rather than decorative. */
+  :root {
+    --ground: #f5f7f9;
+    --surface: #ffffff;
+    --surface-2: #eef1f5;
+    --ink: #1a2028;
+    --ink-muted: #5c6874;
+    --ink-faint: #8b97a4;
+    --border: #dde3e9;
+    --border-strong: #c3cdd7;
+
+    --tutor: #b06d22;
+    --tutor-bg: #fbf1e4;
+    --student: #23807f;
+    --student-bg: #e2f1f0;
+    --critical: #bf423a;
+
+    --sans: 'IBM Plex Sans', ui-sans-serif, system-ui, sans-serif;
+    --mono: 'IBM Plex Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+    --serif: 'IBM Plex Serif', Georgia, serif;
+
+    --measure: 62ch;
+    --radius: 6px;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground: #14181d;
+      --surface: #1c2229;
+      --surface-2: #232b33;
+      --ink: #e4e9ef;
+      --ink-muted: #94a1af;
+      --ink-faint: #6d7a88;
+      --border: #2b333c;
+      --border-strong: #3c4650;
+      --tutor: #e0a05a;
+      --tutor-bg: #2e2419;
+      --student: #4fb5b3;
+      --student-bg: #16302f;
+      --critical: #e2716a;
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --ground: #14181d;
+    --surface: #1c2229;
+    --surface-2: #232b33;
+    --ink: #e4e9ef;
+    --ink-muted: #94a1af;
+    --ink-faint: #6d7a88;
+    --border: #2b333c;
+    --border-strong: #3c4650;
+    --tutor: #e0a05a;
+    --tutor-bg: #2e2419;
+    --student: #4fb5b3;
+    --student-bg: #16302f;
+    --critical: #e2716a;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--ground);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 16px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap {
+    width: 100%;
+    max-width: 1080px;
+    margin-inline: auto;
+    padding-inline: 20px;
+  }
+
+  section { padding-block: 72px; border-top: 1px solid var(--border); }
+  section:first-of-type { border-top: 0; }
+
+  h1, h2, h3 { font-family: var(--serif); font-weight: 400; text-wrap: balance; margin: 0; }
+  h1 { font-size: clamp(34px, 6.2vw, 58px); line-height: 1.08; letter-spacing: -0.02em; }
+  h2 { font-size: clamp(25px, 3.6vw, 34px); line-height: 1.2; letter-spacing: -0.012em; }
+  h3 { font-size: 18px; line-height: 1.35; }
+  p { margin: 0; }
+
+  .eyebrow {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin: 0 0 14px;
+  }
+
+  .lede { font-size: clamp(17px, 2vw, 19px); color: var(--ink-muted); max-width: var(--measure); }
+  .note { font-size: 14px; color: var(--ink-faint); }
+
+  a { color: inherit; }
+  :focus-visible { outline: 2px solid var(--student); outline-offset: 3px; border-radius: 3px; }
+
+  /* ---------- masthead ---------- */
+  .masthead {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding-block: 20px;
+    border-bottom: 1px solid var(--border);
+  }
+  .brand { display: flex; align-items: center; gap: 10px; margin-right: auto; font-family: var(--serif); font-size: 19px; }
+  .brand .dot {
+    width: 11px; height: 11px; border-radius: 50%;
+    background: var(--tutor);
+    box-shadow: 0 0 0 4px color-mix(in oklab, var(--tutor) 20%, transparent);
+  }
+  .masthead .note { display: none; }
+  @media (min-width: 720px) { .masthead .note { display: block; } }
+
+  .btn {
+    font: inherit;
+    font-size: 15px;
+    font-weight: 500;
+    padding: 10px 18px;
+    border-radius: var(--radius);
+    border: 1px solid var(--border-strong);
+    background: var(--surface);
+    color: var(--ink);
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+    transition: border-color 120ms ease, background 120ms ease, transform 120ms ease;
+  }
+  .btn:hover { border-color: var(--ink-faint); }
+  .btn:active { transform: translateY(1px); }
+  .btn.primary { background: var(--ink); color: var(--ground); border-color: var(--ink); }
+  .btn.primary:hover { opacity: 0.88; }
+
+  /* ---------- hero ---------- */
+  .hero { display: grid; gap: 40px; align-items: start; }
+  @media (min-width: 900px) { .hero { grid-template-columns: 1fr 1fr; gap: 56px; } }
+
+  .hero-copy { display: flex; flex-direction: column; gap: 22px; }
+  .hero h1 em { font-style: italic; color: var(--tutor); }
+  .cta-row { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+
+  .claims { display: flex; flex-wrap: wrap; gap: 8px 18px; font-family: var(--mono); font-size: 12px; color: var(--ink-faint); }
+  .claims span { display: inline-flex; align-items: center; gap: 7px; }
+  .claims span::before { content: ''; width: 5px; height: 5px; border-radius: 50%; background: var(--student); }
+
+  /* ---------- the running demo ---------- */
+  .stage {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 1px 2px color-mix(in oklab, var(--ink) 6%, transparent);
+  }
+  .stage-bar {
+    display: flex; align-items: center; gap: 10px;
+    padding: 11px 14px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface-2);
+    font-family: var(--mono); font-size: 11px; color: var(--ink-faint);
+  }
+  .stage-bar .where { margin-right: auto; letter-spacing: 0.06em; }
+
+  .replay {
+    font: inherit; font-family: var(--mono); font-size: 11px;
+    border: 1px solid var(--border-strong); background: var(--surface);
+    color: var(--ink-muted); border-radius: 999px; padding: 4px 11px; cursor: pointer;
+  }
+  .replay:hover { color: var(--ink); border-color: var(--ink-faint); }
+
+  .stage-body { display: grid; grid-template-columns: 74px 1fr; gap: 16px; padding: 20px 16px; align-items: start; }
+
+  /* the orb, as in the app: state is read before any words are */
+  .orb-hold { display: flex; flex-direction: column; align-items: center; gap: 9px; }
+  .orb { position: relative; width: 52px; height: 52px; display: grid; place-items: center; }
+  .orb .core {
+    width: 20px; height: 20px; border-radius: 50%;
+    background: var(--ink-faint);
+    transition: background 260ms ease, transform 260ms ease;
+  }
+  .orb .ring {
+    position: absolute; inset: 0; border-radius: 50%;
+    border: 1.5px solid transparent;
+  }
+  .orb[data-mode="speaking"] .core { background: var(--tutor); transform: scale(1.1); }
+  .orb[data-mode="speaking"] .ring { border-color: color-mix(in oklab, var(--tutor) 45%, transparent); animation: pulse 1.6s ease-out infinite; }
+  .orb[data-mode="speaking"] .ring.two { animation-delay: 0.55s; }
+  .orb[data-mode="listening"] .core { background: var(--student); }
+  .orb[data-mode="listening"] .ring { border-color: color-mix(in oklab, var(--student) 45%, transparent); animation: pulse 2.1s ease-out infinite; }
+  .orb[data-mode="thinking"] .core { background: var(--ink-faint); animation: breathe 1.5s ease-in-out infinite; }
+
+  @keyframes pulse { from { transform: scale(0.55); opacity: 0.9; } to { transform: scale(1); opacity: 0; } }
+  @keyframes breathe { 0%, 100% { transform: scale(1); } 50% { transform: scale(0.72); } }
+
+  .orb-state { font-family: var(--mono); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-faint); text-align: center; }
+
+  .stage-main { min-width: 0; display: flex; flex-direction: column; gap: 14px; }
+
+  /* the canvas the tutor draws on */
+  .canvas {
+    min-height: 168px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--ground);
+    padding: 16px;
+    display: flex; flex-direction: column; justify-content: center; gap: 10px;
+  }
+  .canvas .empty { font-size: 13px; color: var(--ink-faint); font-family: var(--mono); }
+  .canvas .statement { font-family: var(--serif); font-size: 19px; line-height: 1.35; text-wrap: balance; }
+  .canvas pre {
+    margin: 0; font-family: var(--mono); font-size: 13px; line-height: 1.75;
+    overflow-x: auto; counter-reset: ln;
+  }
+  .canvas pre .line { display: block; padding-inline: 8px; border-radius: 3px; white-space: pre; }
+  .canvas pre .line::before {
+    counter-increment: ln; content: counter(ln);
+    display: inline-block; width: 1.6em; margin-right: 12px;
+    color: var(--ink-faint); text-align: right;
+  }
+  .canvas pre .line.lit { background: color-mix(in oklab, var(--tutor) 20%, transparent); }
+  .canvas ol.steps { margin: 0; padding-left: 20px; font-size: 14.5px; display: flex; flex-direction: column; gap: 6px; }
+  .canvas ol.steps li::marker { color: var(--tutor); font-family: var(--mono); font-size: 12px; }
+  .canvas .cap { font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-faint); }
+
+  .caption { min-height: 4.4em; font-size: 15.5px; line-height: 1.55; }
+  .caption .who {
+    font-family: var(--mono); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase;
+    display: block; margin-bottom: 4px;
+  }
+  .caption.tutor .who { color: var(--tutor); }
+  .caption.student .who { color: var(--student); }
+  .caption.student .said { font-family: var(--serif); color: var(--student); }
+  .cursor { display: inline-block; width: 2px; height: 1.05em; vertical-align: -0.16em; background: var(--tutor); margin-left: 1px; animation: blink 1.05s steps(2) infinite; }
+  @keyframes blink { 50% { opacity: 0; } }
+
+  .marked {
+    display: flex; align-items: baseline; gap: 9px;
+    font-size: 13px; color: var(--ink-muted);
+    padding-top: 10px; border-top: 1px dashed var(--border);
+  }
+  .badge {
+    font-family: var(--mono); font-size: 9.5px; letter-spacing: 0.1em; text-transform: uppercase;
+    padding: 2px 8px; border-radius: 999px; flex: none;
+    background: color-mix(in oklab, var(--student) 24%, transparent); color: var(--ink);
+  }
+  .belief { display: flex; align-items: center; gap: 9px; font-family: var(--mono); font-size: 11px; color: var(--ink-faint); }
+  .belief .track { flex: 1; height: 4px; border-radius: 99px; background: var(--surface-2); overflow: hidden; }
+  .belief .fill { display: block; height: 100%; width: 25%; background: var(--student); transition: width 900ms cubic-bezier(0.22, 1, 0.36, 1); }
+
+  /* ---------- how it works: a real sequence, so it is numbered ---------- */
+  .steps-grid { display: grid; gap: 28px; margin-top: 36px; }
+  @media (min-width: 760px) { .steps-grid { grid-template-columns: repeat(3, 1fr); gap: 32px; } }
+  .step { display: flex; flex-direction: column; gap: 9px; }
+  .step .n {
+    font-family: var(--mono); font-size: 11px; color: var(--tutor);
+    letter-spacing: 0.1em; padding-bottom: 9px; border-bottom: 1px solid var(--border-strong);
+  }
+  .step p { font-size: 15px; color: var(--ink-muted); }
+
+  /* ---------- canvas tools ---------- */
+  .tools { display: grid; gap: 1px; margin-top: 36px; background: var(--border); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+  @media (min-width: 620px) { .tools { grid-template-columns: repeat(2, 1fr); } }
+  @media (min-width: 940px) { .tools { grid-template-columns: repeat(4, 1fr); } }
+  .tool { background: var(--surface); padding: 18px 16px; display: flex; flex-direction: column; gap: 7px; }
+  .tool code { font-family: var(--mono); font-size: 12px; color: var(--tutor); }
+  .tool span { font-size: 13.5px; color: var(--ink-muted); line-height: 1.5; }
+
+  /* ---------- transcript motif ---------- */
+  .exchange { display: flex; flex-direction: column; gap: 14px; margin-top: 32px; max-width: var(--measure); }
+  .turn { display: grid; grid-template-columns: 76px 1fr; gap: 14px; align-items: baseline; }
+  .turn .who { font-family: var(--mono); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; }
+  .turn.t .who { color: var(--tutor); }
+  .turn.s .who { color: var(--student); }
+  .turn.s p { font-family: var(--serif); color: var(--student); }
+  .turn p { font-size: 15.5px; }
+  @media (max-width: 560px) {
+    .turn { grid-template-columns: 1fr; gap: 3px; }
+  }
+
+  /* ---------- two-column explainer ---------- */
+  .split { display: grid; gap: 40px; align-items: start; }
+  @media (min-width: 880px) { .split { grid-template-columns: 1fr 1fr; gap: 56px; } }
+
+  .facts { display: flex; flex-direction: column; gap: 0; margin-top: 8px; }
+  .fact { display: grid; grid-template-columns: 1fr auto; gap: 16px; padding-block: 13px; border-bottom: 1px solid var(--border); align-items: baseline; }
+  .fact:first-child { border-top: 1px solid var(--border); }
+  .fact dt { font-size: 14.5px; color: var(--ink-muted); }
+  .fact dd { margin: 0; font-family: var(--mono); font-size: 13px; font-variant-numeric: tabular-nums; text-align: right; }
+
+  /* ---------- evidence trail ---------- */
+  .evidence { border: 1px solid var(--border); border-radius: 8px; background: var(--surface); overflow: hidden; }
+  .evidence-head { padding: 14px 16px; border-bottom: 1px solid var(--border); display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+  .evidence-head strong { font-family: var(--serif); font-weight: 500; font-size: 16px; }
+  .evidence-row { padding: 14px 16px; border-bottom: 1px solid var(--border); display: flex; flex-direction: column; gap: 5px; }
+  .evidence-row:last-child { border-bottom: 0; }
+  .evidence-row .q { font-size: 13.5px; color: var(--ink-muted); }
+  .evidence-row .a { font-family: var(--serif); color: var(--student); font-size: 15px; }
+  .evidence-row .m { font-size: 12.5px; color: var(--critical); }
+  .verdict { font-family: var(--mono); font-size: 9.5px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-faint); }
+
+  /* ---------- pricing ---------- */
+  .plans { display: grid; gap: 20px; margin-top: 36px; align-items: stretch; }
+  @media (min-width: 720px) { .plans { grid-template-columns: 1fr 1fr; gap: 24px; } }
+  .plan { border: 1px solid var(--border); border-radius: 10px; padding: 26px 24px; background: var(--surface); display: flex; flex-direction: column; gap: 16px; }
+  .plan.lead { border-color: var(--tutor); box-shadow: 0 0 0 1px var(--tutor); }
+  .plan .kind { font-family: var(--mono); font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-faint); }
+  .plan.lead .kind { color: var(--tutor); }
+  .price { font-family: var(--serif); font-size: 40px; line-height: 1; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+  .price small { font-family: var(--sans); font-size: 14px; color: var(--ink-muted); letter-spacing: 0; }
+  .plan ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 9px; font-size: 14.5px; color: var(--ink-muted); }
+  .plan li { display: grid; grid-template-columns: 16px 1fr; gap: 9px; align-items: start; }
+  .plan li::before { content: '—'; color: var(--ink-faint); font-family: var(--mono); font-size: 12px; line-height: 1.7; }
+  .plan .btn { margin-top: auto; text-align: center; }
+
+  /* ---------- faq ---------- */
+  .faq { max-width: var(--measure); margin-top: 28px; }
+  .faq details { border-bottom: 1px solid var(--border); }
+  .faq summary { padding-block: 15px; cursor: pointer; font-size: 15.5px; list-style: none; display: flex; gap: 12px; align-items: baseline; }
+  .faq summary::-webkit-details-marker { display: none; }
+  .faq summary::before { content: '+'; font-family: var(--mono); color: var(--tutor); font-size: 14px; }
+  .faq details[open] summary::before { content: '–'; }
+  .faq p { padding: 0 0 16px 24px; font-size: 14.5px; color: var(--ink-muted); }
+
+  /* ---------- closing ---------- */
+  .close { text-align: center; display: flex; flex-direction: column; align-items: center; gap: 22px; }
+  .close h2 { max-width: 18ch; }
+
+  footer { border-top: 1px solid var(--border); padding-block: 28px; font-size: 13px; color: var(--ink-faint); display: flex; gap: 16px; flex-wrap: wrap; align-items: center; }
+  footer .spacer { margin-left: auto; }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; }
+  }
+</style>
+
+<div class="wrap">
+  <header class="masthead">
+    <div class="brand"><span class="dot"></span> Lumen</div>
+    <p class="note">Built in Lagos</p>
+    <a class="btn" href="#pricing">Pricing</a>
+    <a class="btn primary" href="#start">Upload a document</a>
+  </header>
+</div>
+
+<div class="wrap">
+  <section>
+    <div class="hero">
+      <div class="hero-copy">
+        <p class="eyebrow">AI tutor · voice · live canvas</p>
+        <h1>Hand it a document. It <em>teaches</em> you the thing.</h1>
+        <p class="lede">
+          Lumen reads what you upload, works out what it actually teaches, then talks you
+          through it — drawing on a board as it goes, stopping to ask whether it landed, and
+          coming at it a different way when it didn't.
+        </p>
+        <div class="cta-row">
+          <a class="btn primary" href="#start">Start with one free document</a>
+          <a class="btn" href="#demo">Watch it teach</a>
+        </div>
+        <div class="claims">
+          <span>PDF, Word, PowerPoint, text</span>
+          <span>Cut in whenever you like</span>
+          <span>₦2,500 a month</span>
+        </div>
+      </div>
+
+      <!--
+        See Lumen in action. This is the tutor actually running, not a screenshot: the orb, the
+        caption, the canvas and the marking are the same shapes the product uses.
+        To drop in a real screen recording later, replace .stage-body with:
+          <video src="lumen-demo.mp4" controls playsinline poster="lumen-poster.jpg"></video>
+      -->
+      <div class="stage" id="demo">
+        <div class="stage-bar">
+          <span class="where" id="where">Loops · Counted loops</span>
+          <button class="replay" id="replay" type="button">Replay</button>
+        </div>
+        <div class="stage-body">
+          <div class="orb-hold">
+            <div class="orb" id="orb" data-mode="thinking">
+              <span class="ring"></span><span class="ring two"></span><span class="core"></span>
+            </div>
+            <span class="orb-state" id="orbState">Thinking</span>
+          </div>
+
+          <div class="stage-main">
+            <div class="canvas" id="canvas">
+              <p class="empty">The board is empty.</p>
+            </div>
+
+            <p class="caption tutor" id="caption">
+              <span class="who" id="who">Tutor</span><span class="said" id="said"></span><span class="cursor" id="cursor"></span>
+            </p>
+
+            <div class="marked" id="marked" hidden>
+              <span class="badge" id="verdict">Correct</span>
+              <span id="reason">Belief is 91%; that is enough to move on.</span>
+            </div>
+
+            <div class="belief">
+              <span>belief</span>
+              <span class="track"><span class="fill" id="beliefFill"></span></span>
+              <span id="beliefValue">0.25</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <p class="eyebrow">How it goes</p>
+    <h2>Three things happen, in this order.</h2>
+    <div class="steps-grid">
+      <div class="step">
+        <span class="n">01 — Upload</span>
+        <h3>You hand over a document</h3>
+        <p>
+          A chapter, a set of slides, lecture notes. PDF, Word, PowerPoint or plain text. If it
+          turns out to be a scan with no text in it, Lumen says so and tells you to run it
+          through OCR rather than quietly building a course out of nothing.
+        </p>
+      </div>
+      <div class="step">
+        <span class="n">02 — It reads</span>
+        <h3>The model decides the lessons</h3>
+        <p>
+          Not a table of contents scraped off the headings. It reads the material and works out
+          what has to be understood before what, then grounds every concept in the passage it
+          came from — so anything it says can be traced back.
+        </p>
+      </div>
+      <div class="step">
+        <span class="n">03 — It teaches</span>
+        <h3>Out loud, and it waits for you</h3>
+        <p>
+          Every turn is generated in the moment, not read off a script. It draws while it
+          explains, asks a question when it thinks the idea has landed, then stops talking and
+          gives you twelve seconds of silence to think in.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <p class="eyebrow">The board</p>
+    <div class="split">
+      <div>
+        <h2>It illustrates while it talks.</h2>
+        <p class="lede" style="margin-top:18px">
+          The tutor has eight things it can put on the board, and it chooses them mid-sentence —
+          the way a lecturer turns around and writes something down. Nothing is pre-rendered from
+          the document.
+        </p>
+        <p class="note" style="margin-top:16px">
+          Every one is checked before it is drawn. Ask to highlight line nine of a four-line
+          program and the request comes back as an error, because a board that quietly does the
+          wrong thing is worse than one that refuses.
+        </p>
+      </div>
+      <div class="tools">
+        <div class="tool"><code>show_statement</code><span>The line worth leaving up — a definition, a rule, the claim being made.</span></div>
+        <div class="tool"><code>show_steps</code><span>Points that arrive one at a time, in step with being said.</span></div>
+        <div class="tool"><code>show_code</code><span>A program, with the line under discussion lit.</span></div>
+        <div class="tool"><code>highlight_code</code><span>Moves the lit line as the explanation walks through it.</span></div>
+        <div class="tool"><code>show_diagram</code><span>Boxes and arrows, for the relationships prose is bad at.</span></div>
+        <div class="tool"><code>show_chart</code><span>Bars, lines and scatter, when the shape of the numbers is the point.</span></div>
+        <div class="tool"><code>show_math</code><span>Real typeset equations, not pictures of equations.</span></div>
+        <div class="tool"><code>clear_canvas</code><span>Wipes it, so the next idea starts on a clean board.</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <p class="eyebrow">Interruptions</p>
+    <div class="split">
+      <div>
+        <h2>You can talk over it.</h2>
+        <p class="lede" style="margin-top:18px">
+          Cut in mid-sentence and it stops — actually stops, at the word you cut in on. It deals
+          with what you said, then picks the thread back up from the start of the clause rather
+          than the middle of a word, because re-entering mid-word sounds like a stutter instead
+          of a teacher carrying on.
+        </p>
+        <dl class="facts">
+          <div class="fact"><dt>Time it waits after asking you something</dt><dd>12s</dd></div>
+          <div class="fact"><dt>Tutor turns before it checks the idea landed</dt><dd>3</dd></div>
+          <div class="fact"><dt>Different explanations before it moves on anyway</dt><dd>2</dd></div>
+          <div class="fact"><dt>What saying nothing costs you</dt><dd>nothing</dd></div>
+        </dl>
+      </div>
+      <div>
+        <p class="eyebrow">A real exchange</p>
+        <div class="exchange">
+          <div class="turn t"><span class="who">Tutor</span><p>So the counter starts at zero and stops below five. How many times does the body run?</p></div>
+          <div class="turn s"><span class="who">You</span><p>Six? Zero through five.</p></div>
+          <div class="turn t"><span class="who">Tutor</span><p>Close, and the reasoning is right — you counted every value the counter holds. Count them again, but stop before five.</p></div>
+          <div class="turn s"><span class="who">You</span><p>Ah — five. It never actually goes in as five.</p></div>
+          <div class="turn t"><span class="who">Tutor</span><p>That's it. The stopping value is the first one that doesn't get used.</p></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <p class="eyebrow">What it knows about you</p>
+    <div class="split">
+      <div>
+        <h2>It keeps the receipts.</h2>
+        <p class="lede" style="margin-top:18px">
+          Lumen holds a number for every concept: how confident it is that you have it. That
+          number decides whether you get taught something a second time, so you can open it and
+          see exactly which answers moved it and by how much.
+        </p>
+        <p class="note" style="margin-top:16px">
+          Saying nothing never counts against you. A student who went quiet has told it
+          nothing about what they know, and marking that as failure would punish thinking.
+        </p>
+        <p class="note" style="margin-top:12px">
+          And when it gives up on a concept, it says so instead of burying it.
+        </p>
+      </div>
+
+      <div class="evidence">
+        <div class="evidence-head">
+          <strong>Off-by-one errors</strong>
+          <span class="verdict">belief 0.91 · shown</span>
+        </div>
+        <div class="evidence-row">
+          <span class="verdict">Incorrect</span>
+          <p class="q">How many items have indices zero through four?</p>
+          <p class="a">“Four.”</p>
+          <p class="m">Read as: counting the highest index as the count</p>
+        </div>
+        <div class="evidence-row">
+          <span class="verdict">Partial</span>
+          <p class="q">So what is the highest index of a five-item list?</p>
+          <p class="a">“Four — because you start from zero.”</p>
+        </div>
+        <div class="evidence-row">
+          <span class="verdict">Correct</span>
+          <p class="q">And if it had eleven items?</p>
+          <p class="a">“Ten. Always one less than however many there are.”</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <p class="eyebrow">How it talks</p>
+    <div class="split">
+      <div>
+        <h2>It meets you where you speak.</h2>
+        <p class="lede" style="margin-top:18px">
+          Lumen opens in standard English at everybody. If you drop into Pidgin, it notices —
+          and only after you have done it twice does it start throwing one back. Never in a
+          definition, never in a question it is marking you on. The terms stay precise, because
+          you will be examined in them.
+        </p>
+        <p class="note" style="margin-top:16px">
+          Tell it to speak plainly and it does, immediately, for good. Nothing you say afterwards
+          re-opens it.
+        </p>
+      </div>
+      <div>
+        <div class="exchange" style="margin-top:0">
+          <div class="turn s"><span class="who">You</span><p>Abeg, explain am again — I no sabi this one at all.</p></div>
+          <div class="turn t"><span class="who">Tutor</span><p>No wahala. Look at the board again — forget the code for a second. A loop is a promise about <em>when it stops</em>. That's the whole hard part.</p></div>
+          <div class="turn s"><span class="who">You</span><p>Ehen. So the condition is the promise.</p></div>
+          <div class="turn t"><span class="who">Tutor</span><p>Exactly that. And a condition nothing inside the body can ever make false is a loop that runs forever.</p></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="pricing">
+    <p class="eyebrow">Pricing</p>
+    <h2>One document a month, free. No card.</h2>
+    <p class="lede" style="margin-top:16px">
+      The charge lands on turning a document into a course — that is where the real work
+      happens. Being taught from something you already uploaded is never charged for twice, and
+      a free course is a whole course, not a trial that stops mid-explanation.
+    </p>
+
+    <div class="plans">
+      <div class="plan">
+        <span class="kind">Free</span>
+        <p class="price">₦0<small> / month</small></p>
+        <ul>
+          <li>One document a month, turned into a full course</li>
+          <li>Every lesson in it, taught end to end</li>
+          <li>Voice, the live board, all eight drawing tools</li>
+          <li>Your progress and the evidence behind it</li>
+          <li>Allowance comes back on the 1st</li>
+        </ul>
+        <a class="btn" href="#start">Upload your first document</a>
+      </div>
+
+      <div class="plan lead">
+        <span class="kind">Lumen</span>
+        <p class="price">₦2,500<small> / month</small></p>
+        <ul>
+          <li>As many documents as you like</li>
+          <li>Everything in the free tier, uncapped</li>
+          <li>Concepts you have already shown are skipped, not re-taught</li>
+          <li>Progress carried across every course you upload</li>
+          <li>Card, bank transfer or USSD</li>
+        </ul>
+        <a class="btn primary" href="#start">Subscribe</a>
+      </div>
+    </div>
+    <p class="note" style="margin-top:20px">Cancel whenever. Paying again while you still have time left adds to it rather than replacing it.</p>
+  </section>
+
+  <section>
+    <p class="eyebrow">Questions</p>
+    <h2>Before you upload anything.</h2>
+    <div class="faq">
+      <details open>
+        <summary>What can I actually give it?</summary>
+        <p>PDF, Word, PowerPoint, plain text and Markdown, up to 32MB. If a PDF turns out to be a scan or a photograph of pages, it tells you it needs OCR first instead of building an empty course and letting you find out later.</p>
+      </details>
+      <details>
+        <summary>Do I need a microphone?</summary>
+        <p>No. It reads aloud either way, and you can type anything you'd have said. With a microphone you also get to cut in mid-sentence, which is the part people end up using most.</p>
+      </details>
+      <details>
+        <summary>Is it just reading my document back to me?</summary>
+        <p>No. Every turn is generated live against what you just said and what is already on the board — so asking a question changes what comes next. What it can't do is go outside your material: ask it something the document doesn't cover and it says so rather than answering from general knowledge.</p>
+      </details>
+      <details>
+        <summary>What if I get something wrong?</summary>
+        <p>It explains it again from a different angle — a different example, a different order, a picture instead of words. After two goes it moves on and records that the concept didn't land, rather than holding you in a loop you can't leave.</p>
+      </details>
+      <details>
+        <summary>Who else sees my documents?</summary>
+        <p>Nobody. They are yours, they are used to build your course, and your progress is yours to look at. Uploads are stored under opaque keys that carry no file name.</p>
+      </details>
+    </div>
+  </section>
+
+  <section id="start">
+    <div class="close">
+      <h2>Give it the thing you have been avoiding.</h2>
+      <p class="lede" style="text-align:center">
+        The chapter you have opened four times. It takes about a minute to read it, and then it
+        starts talking.
+      </p>
+      <a class="btn primary" href="#start" style="font-size:16px;padding:13px 26px">Upload a document — free</a>
+      <p class="note">One a month, free, forever. No card until you want the second one.</p>
+    </div>
+  </section>
+
+  <footer>
+    <span>Lumen</span>
+    <span class="spacer"></span>
+    <span>Naira pricing · Nigerian English and Pidgin</span>
+  </footer>
+</div>
+
+<script>
+  (function () {
+    var orb = document.getElementById('orb');
+    var orbState = document.getElementById('orbState');
+    var canvas = document.getElementById('canvas');
+    var caption = document.getElementById('caption');
+    var who = document.getElementById('who');
+    var said = document.getElementById('said');
+    var cursor = document.getElementById('cursor');
+    var marked = document.getElementById('marked');
+    var verdict = document.getElementById('verdict');
+    var reason = document.getElementById('reason');
+    var beliefFill = document.getElementById('beliefFill');
+    var beliefValue = document.getElementById('beliefValue');
+    var where = document.getElementById('where');
+    var replay = document.getElementById('replay');
+
+    var calm = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var timers = [];
+
+    function at(ms, fn) { timers.push(setTimeout(fn, ms)); }
+    function clear() { timers.forEach(clearTimeout); timers = []; }
+
+    function mode(name, label) {
+      orb.setAttribute('data-mode', name);
+      orbState.textContent = label;
+    }
+
+    function speaker(kind) {
+      caption.className = 'caption ' + kind;
+      who.textContent = kind === 'tutor' ? 'Tutor' : 'You';
+      cursor.style.background = kind === 'tutor' ? 'var(--tutor)' : 'var(--student)';
+    }
+
+    function belief(value) {
+      beliefFill.style.width = Math.round(value * 100) + '%';
+      beliefValue.textContent = value.toFixed(2);
+    }
+
+    // The board, drawn the way the tutor's own display tools shape it.
+    function draw(command) {
+      if (command.tool === 'show_statement') {
+        canvas.innerHTML = '<span class="cap">statement</span><p class="statement"></p>';
+        canvas.querySelector('.statement').textContent = command.text;
+      } else if (command.tool === 'show_code') {
+        var pre = document.createElement('pre');
+        command.source.split('\n').forEach(function (line) {
+          var row = document.createElement('span');
+          row.className = 'line';
+          row.textContent = line;
+          pre.appendChild(row);
+        });
+        canvas.innerHTML = '<span class="cap">' + command.language + '</span>';
+        canvas.appendChild(pre);
+      } else if (command.tool === 'highlight_code') {
+        var lines = canvas.querySelectorAll('.line');
+        lines.forEach(function (line, index) {
+          line.classList.toggle('lit', index === command.line - 1);
+        });
+      } else if (command.tool === 'show_steps') {
+        var list = '<span class="cap">' + command.title + '</span><ol class="steps">';
+        command.items.forEach(function (item) {
+          list += '<li>' + item + '</li>';
+        });
+        canvas.innerHTML = list + '</ol>';
+      }
+    }
+
+    // Typed out rather than dropped in, because the board is timed against the words.
+    function say(text, speed, done) {
+      var i = 0;
+      said.textContent = '';
+      if (calm) { said.textContent = text; done && done(); return; }
+      (function step() {
+        said.textContent = text.slice(0, ++i);
+        if (i < text.length) { timers.push(setTimeout(step, speed)); }
+        else if (done) { timers.push(setTimeout(done, 240)); }
+      })();
+    }
+
+    var script = [
+      { wait: 260, run: function () {
+          mode('thinking', 'Thinking');
+          speaker('tutor');
+          belief(0.25);
+          marked.hidden = true;
+          canvas.innerHTML = '<p class="empty">The board is empty.</p>';
+          where.textContent = 'Loops · Counted loops';
+      } },
+      { wait: 700, run: function () {
+          mode('speaking', 'Speaking');
+          say('A loop is a promise that a block runs more than once — and a promise about when it stops.', 24);
+      } },
+      { wait: 1500, run: function () {
+          draw({ tool: 'show_statement', text: 'Everything hard about loops is the second half of that sentence.' });
+      } },
+      { wait: 2700, run: function () {
+          say('Here is the counted one. Three parts: where it starts, how long it keeps going, how it moves.', 24);
+          draw({ tool: 'show_code', language: 'python', source: 'for i in range(5):\n    print(i)\n\n# i holds 0, 1, 2, 3, 4' });
+      } },
+      { wait: 3100, run: function () { draw({ tool: 'highlight_code', line: 1 }); } },
+      { wait: 1900, run: function () {
+          say('Start at zero, keep going while it is under five, add one each time round.', 24);
+          draw({ tool: 'highlight_code', line: 4 });
+      } },
+      { wait: 2600, run: function () {
+          mode('speaking', 'Asking');
+          say('So — how many times does the body actually run?', 26);
+      } },
+      { wait: 1700, run: function () { mode('listening', 'Listening'); said.textContent = ''; who.textContent = 'Tutor'; } },
+      { wait: 1500, run: function () {
+          speaker('student');
+          say('Five. Zero, one, two, three, four — it never goes in as five.', 30);
+      } },
+      { wait: 2600, run: function () { mode('thinking', 'Marking'); } },
+      { wait: 900, run: function () {
+          marked.hidden = false;
+          verdict.textContent = 'Correct';
+          reason.textContent = 'Belief is 91%; that is enough to move on.';
+          belief(0.91);
+          speaker('tutor');
+          mode('speaking', 'Speaking');
+          say('That is exactly it — the stopping value is the first one that never gets used.', 24);
+          where.textContent = 'Loops · Off-by-one errors';
+      } },
+      { wait: 3200, run: function () { mode('thinking', 'Thinking'); cursor.hidden = true; } }
+    ];
+
+    function play() {
+      clear();
+      cursor.hidden = false;
+      var elapsed = 0;
+      script.forEach(function (beat) {
+        elapsed += calm ? Math.min(beat.wait, 120) : beat.wait;
+        at(elapsed, beat.run);
+      });
+    }
+
+    replay.addEventListener('click', play);
+    play();
+  })();
+</script>
