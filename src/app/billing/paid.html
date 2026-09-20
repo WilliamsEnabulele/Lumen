@@ -1,0 +1,39 @@
+<section class="paid">
+  @if (error(); as message) {
+    <h2>We could not look that payment up</h2>
+    <p class="lede">{{ message }}</p>
+    <p class="quiet">Your reference is <code>{{ reference() }}</code>. Keep it — it identifies the payment.</p>
+    <button class="primary" (click)="continue()">Back to Lumen</button>
+  } @else if (payment()?.status === 'Paid') {
+    <div class="tick" aria-hidden="true"></div>
+    <h2>You're in.</h2>
+    <p class="lede">{{ payment()!.outcome }} Upload as many documents as you like.</p>
+    <button class="primary" (click)="continue()">Upload a document</button>
+  } @else if (payment()?.status === 'Underpaid') {
+    <h2>Part of it arrived</h2>
+    <p class="lede">{{ payment()!.outcome }}</p>
+    <p class="quiet">
+      Nothing has been lost. Send us the reference below and we will either finish it off or
+      send it back.
+    </p>
+    <p class="reference"><code>{{ reference() }}</code></p>
+    <button class="primary" (click)="continue()">Back to Lumen</button>
+  } @else if (payment()?.status === 'Failed') {
+    <h2>That payment did not go through</h2>
+    <p class="lede">{{ payment()!.outcome }}</p>
+    <p class="quiet">Nothing was taken. You can try again whenever you like.</p>
+    <button class="primary" (click)="continue()">Back to Lumen</button>
+  } @else if (waitedTooLong()) {
+    <h2>Still waiting to hear from the bank</h2>
+    <p class="lede">
+      If the money left your account it is fine — the confirmation just has not reached us yet.
+      It usually arrives within a minute or two.
+    </p>
+    <p class="quiet">Your reference is <code>{{ reference() }}</code>. Quote it if you need to ask us.</p>
+    <button class="primary" (click)="continue()">Back to Lumen</button>
+  } @else {
+    <div class="waiting" aria-hidden="true"><span></span><span></span><span></span></div>
+    <h2>Confirming your payment</h2>
+    <p class="lede">Waiting for the bank to tell us it went through. This usually takes a few seconds.</p>
+  }
+</section>

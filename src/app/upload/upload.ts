@@ -1,13 +1,15 @@
 import { Component, output, signal, inject, OnDestroy } from '@angular/core';
+import { Paywall } from '../billing/paywall';
 import { IngestionStatus } from 'domain';
 import { Subscription, interval, switchMap } from 'rxjs';
-import { LumenApi } from '../api/lumen-api';
+import { LumenApi, PaywallError } from '../api/lumen-api';
 
 /** How often to ask how the lesson is coming along. */
 const POLL_MS = 700;
 
 @Component({
   selector: 'lumen-upload',
+  imports: [Paywall],
   templateUrl: './upload.html',
   styleUrl: './upload.scss',
 })
@@ -22,6 +24,12 @@ export class Upload implements OnDestroy {
   readonly dragging = signal(false);
   readonly formats = signal<string[]>([]);
   readonly fileName = signal<string | null>(null);
+
+  /**
+   * Set when the month's free document is already spent. Held apart from `error` because it is
+   * not one: nothing failed, and the two want completely different words and buttons.
+   */
+  readonly paywalled = signal<PaywallError | null>(null);
 
   private polling: Subscription | null = null;
 
@@ -57,6 +65,7 @@ export class Upload implements OnDestroy {
     this.stopPolling();
     this.status.set(null);
     this.error.set(null);
+    this.paywalled.set(null);
     this.fileName.set(null);
   }
 
@@ -66,6 +75,7 @@ export class Upload implements OnDestroy {
 
   private send(file: File): void {
     this.error.set(null);
+    this.paywalled.set(null);
     this.fileName.set(file.name);
 
     this.api.upload(file).subscribe({
@@ -75,6 +85,13 @@ export class Upload implements OnDestroy {
       },
       error: (failure: Error) => {
         this.fileName.set(null);
+
+        // Being out of free uploads is a choice to offer, not a failure to report.
+        if (failure instanceof PaywallError) {
+          this.paywalled.set(failure);
+          return;
+        }
+
         this.error.set(failure.message);
       },
     });

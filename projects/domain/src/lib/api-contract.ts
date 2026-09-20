@@ -81,3 +81,41 @@ export interface TurnTaken {
   /** A concept the lesson gave up on and moved past. Null unless that just happened. */
   readonly abandoned: string | null;
 }
+
+/** A thing that can be bought. Price is formatted by the server; the client never computes it. */
+export interface PlanView {
+  readonly code: string;
+  readonly name: string;
+  /** Naira, two decimal places, as a string — never a float to be re-rounded here. */
+  readonly price: string;
+  readonly currency: string;
+  readonly days: number;
+}
+
+export interface StartedPayment {
+  readonly reference: string;
+  /** Where to send the student. The provider's page, not ours. */
+  readonly checkoutUrl: string;
+}
+
+export type PaymentState = 'Pending' | 'Paid' | 'Failed' | 'Underpaid';
+
+export interface PaymentView {
+  readonly reference: string;
+  readonly status: PaymentState;
+  readonly plan: string;
+  readonly amount: string;
+  readonly paid: string | null;
+  readonly outcome: string | null;
+}
+
+/** What this student is allowed to do right now. */
+export interface EntitlementView {
+  readonly active: boolean;
+  readonly plan: string | null;
+  readonly expiresAt: string | null;
+  /** False on a server taking no money, where everything is open. */
+  readonly enforced: boolean;
+  readonly freeUploadsLeft: number;
+  readonly freeAllowanceResetsAt: string;
+}

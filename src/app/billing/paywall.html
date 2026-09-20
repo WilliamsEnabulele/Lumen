@@ -1,0 +1,59 @@
+<section class="paywall">
+  <p class="eyebrow">That is this month's free document</p>
+  <h2>Keep going for {{ plans()[0]?.price ? '₦' + plans()[0]!.price : 'a bit' }} a month.</h2>
+  <p class="lede">{{ reason() }}</p>
+
+  @if (comesBack; as when) {
+    <p class="quiet">
+      The free one comes back on {{ when }}. Everything you have already uploaded stays yours to
+      be taught from — that is never charged for twice.
+    </p>
+  }
+
+  <div class="plans">
+    @for (plan of plans(); track plan.code) {
+      <article class="plan">
+        <span class="kind">{{ plan.name }}</span>
+        <p class="price">₦{{ plan.price }}<small>/ {{ plan.days }} days</small></p>
+        <ul>
+          <li>As many documents as you like</li>
+          <li>Progress carried across every course</li>
+          <li>Concepts you have shown are skipped, not re-taught</li>
+        </ul>
+
+        <div class="who">
+          <label [attr.for]="'name-' + plan.code">Your name</label>
+          <input
+            [id]="'name-' + plan.code"
+            name="name"
+            autocomplete="name"
+            placeholder="Optional"
+            [ngModel]="name()"
+            (ngModelChange)="name.set($event)" />
+
+          <label [attr.for]="'email-' + plan.code">Email for the receipt</label>
+          <input
+            [id]="'email-' + plan.code"
+            name="email"
+            type="email"
+            autocomplete="email"
+            inputmode="email"
+            placeholder="you@example.com"
+            [ngModel]="email()"
+            (ngModelChange)="email.set($event)" />
+        </div>
+
+        <button class="primary" [disabled]="sending()" (click)="subscribe(plan)">
+          {{ sending() ? 'Taking you to pay…' : 'Subscribe' }}
+        </button>
+        <p class="tiny">Card, bank transfer or USSD. Cancel whenever.</p>
+      </article>
+    }
+  </div>
+
+  @if (error(); as message) {
+    <p class="failed">{{ message }}</p>
+  }
+
+  <button class="ghost" (click)="dismissed.emit()">Not now</button>
+</section>

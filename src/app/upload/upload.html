@@ -1,5 +1,10 @@
 <section class="stage">
-  @if (!status() && !error()) {
+  @if (paywalled(); as wall) {
+    <lumen-paywall
+      [reason]="wall.message"
+      [resetsAt]="wall.resetsAt"
+      (dismissed)="retry()" />
+  } @else if (!status() && !error()) {
     <div
       class="drop"
       [class.over]="dragging()"
