@@ -119,3 +119,22 @@ export interface EntitlementView {
   readonly freeUploadsLeft: number;
   readonly freeAllowanceResetsAt: string;
 }
+
+/** Who is signed in, as the server describes them. */
+export interface SignedInStudent {
+  readonly id: string;
+  readonly email: string;
+  readonly name: string;
+}
+
+/**
+ * What signing in, signing up and refreshing all return.
+ *
+ * The access token is here, in the body, because the client has to put it in a header. The
+ * refresh token is not: it travels in an HttpOnly cookie the page cannot read, which is the
+ * whole point of it being the long-lived half.
+ */
+export interface Authenticated extends SignedInStudent {
+  readonly accessToken: string;
+  readonly expiresAt: string;
+}
