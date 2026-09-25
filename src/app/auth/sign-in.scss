@@ -1,0 +1,140 @@
+:host {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  padding-inline: 16px;
+  padding-block: 48px;
+}
+
+.door {
+  width: 100%;
+  max-width: 420px;
+}
+
+header {
+  text-align: center;
+  margin-bottom: 28px;
+}
+
+/* The tutor's colour, because the tutor is the thing on the other side of this door. */
+.mark {
+  margin: 0 0 18px;
+  font-family: var(--serif);
+  font-size: 15px;
+  letter-spacing: 0.02em;
+  color: var(--tutor);
+
+  &::before {
+    content: '';
+    display: inline-block;
+    width: 7px;
+    height: 7px;
+    margin-right: 8px;
+    border-radius: 50%;
+    background: var(--tutor);
+    vertical-align: 0.08em;
+  }
+}
+
+h1 {
+  font-family: var(--serif);
+  font-size: 27px;
+  font-weight: 400;
+  line-height: 1.2;
+  letter-spacing: -0.015em;
+  margin: 0 0 12px;
+  text-wrap: balance;
+}
+
+.lede {
+  margin: 0 auto;
+  max-width: 40ch;
+  color: var(--ink-muted);
+  line-height: 1.6;
+  font-size: 14.5px;
+  text-wrap: pretty;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 26px 24px;
+}
+
+label {
+  font-size: 12px;
+  color: var(--ink-muted);
+  margin-bottom: 5px;
+
+  /* Every label but the first opens a new field below the one before it. */
+  & + input {
+    margin-bottom: 16px;
+  }
+}
+
+input {
+  font: inherit;
+  font-size: 15px;
+  padding: 9px 11px;
+  border: 1px solid var(--border-strong);
+  border-radius: 5px;
+  background: var(--ground);
+  color: var(--ink);
+  width: 100%;
+}
+
+.hint {
+  margin: -10px 0 16px;
+  font-size: 12.5px;
+  color: var(--ink-faint);
+  line-height: 1.45;
+}
+
+/* Always in the document, never taking up room until it has something to say.
+   Rendered rather than inserted because a live region that only appears at the moment it has
+   a message is one a screen reader may not announce — and an empty paragraph generates no
+   line box, so costs nothing to leave there. */
+.failed {
+  margin: 0;
+  font-size: 13.5px;
+  line-height: 1.4;
+  color: var(--critical);
+  text-wrap: pretty;
+}
+
+button[type='submit'] {
+  /* The gap lives here rather than under the message, so it is the same with a refusal on
+     screen and without one. */
+  margin-top: 14px;
+  font: inherit;
+  font-size: 15px;
+  font-weight: 500;
+  padding: 11px 18px;
+  border-radius: 6px;
+}
+
+.swap {
+  margin: 20px 0 0;
+  text-align: center;
+  font-size: 14px;
+  color: var(--ink-muted);
+}
+
+/* The student's colour: this is the one control on the screen that is about them rather than
+   about getting past the door. */
+.ghost {
+  border: 0;
+  background: none;
+  padding: 2px 4px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--student);
+
+  &:hover:not(:disabled) {
+    text-decoration: underline;
+  }
+}

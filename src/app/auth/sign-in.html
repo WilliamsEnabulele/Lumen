@@ -1,0 +1,78 @@
+<section class="door">
+  <header>
+    <p class="mark">Lumen</p>
+    <h1>{{ isSignUp() ? 'Start learning out loud' : 'Pick up where you left off' }}</h1>
+    <p class="lede">
+      @if (isSignUp()) {
+        An account keeps your courses and what the tutor has worked out that you know. Both
+        follow you between devices; neither is worth much on one.
+      } @else {
+        Your courses and your progress are waiting, exactly where the last lesson stopped.
+      }
+    </p>
+  </header>
+
+  <form (ngSubmit)="submit()">
+    @if (isSignUp()) {
+      <label for="name">Your name</label>
+      <input
+        id="name"
+        name="name"
+        autocomplete="name"
+        placeholder="What the tutor should call you"
+        [ngModel]="name()"
+        (ngModelChange)="name.set($event)" />
+    }
+
+    <label for="email">Email</label>
+    <input
+      id="email"
+      name="email"
+      type="email"
+      inputmode="email"
+      autocomplete="email"
+      autocapitalize="off"
+      spellcheck="false"
+      placeholder="you@example.com"
+      [ngModel]="email()"
+      (ngModelChange)="email.set($event)" />
+
+    <label for="password">Password</label>
+    <input
+      id="password"
+      name="password"
+      type="password"
+      [attr.autocomplete]="isSignUp() ? 'new-password' : 'current-password'"
+      [ngModel]="password()"
+      (ngModelChange)="password.set($event)" />
+
+    @if (isSignUp()) {
+      <p class="hint">Length beats punctuation. A short sentence you will not forget.</p>
+    }
+
+    <!-- Announced rather than merely shown: a refusal that only appears visually is one a
+         screen reader user submits into twice. `role="alert"` already implies a live region;
+         saying so again with a politeness that contradicts it is how they end up silent. -->
+    <p class="failed" role="alert">{{ error() }}</p>
+
+    <button class="primary" type="submit" [disabled]="!canSubmit()">
+      @if (busy()) {
+        {{ isSignUp() ? 'Creating your account…' : 'Signing you in…' }}
+      } @else {
+        {{ isSignUp() ? 'Create account' : 'Sign in' }}
+      }
+    </button>
+  </form>
+
+  @if (isSignUp()) {
+    <p class="swap">
+      Already have an account?
+      <button type="button" class="ghost" (click)="switchTo('in')">Sign in</button>
+    </p>
+  } @else {
+    <p class="swap">
+      New here?
+      <button type="button" class="ghost" (click)="switchTo('up')">Create an account</button>
+    </p>
+  }
+</section>

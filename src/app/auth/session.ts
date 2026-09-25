@@ -1,10 +1,17 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Authenticated, SignedInStudent } from 'domain';
-import { Observable, catchError, map, of, shareReplay, tap, throwError } from 'rxjs';
+import { Observable, catchError, map, of, shareReplay, tap } from 'rxjs';
+import { readableFailure } from '../api/lumen-api';
 
-/** Paths that must never carry a bearer token, and must never trigger a refresh. */
-export const AUTH_PATHS = '/api/auth/';
+/**
+ * Where the auth endpoints live.
+ *
+ * Requests under it must never carry a bearer token and must never trigger a refresh. A 401
+ * from `/api/auth/refresh` that refreshed would refresh forever, and the one call guaranteed
+ * to 401 is the one made with a cookie the server has revoked.
+ */
+export const AUTH_PATH = '/api/auth';
 
 /**
  * Who is signed in, and the access token used to prove it.
@@ -53,7 +60,7 @@ export class Session {
     if (this.refreshing) return this.refreshing;
 
     this.refreshing = this.http
-      .post<Authenticated>('/api/auth/refresh', {}, { withCredentials: true })
+      .post<Authenticated>(`${AUTH_PATH}/refresh`, {}, { withCredentials: true })
       .pipe(
         map((authenticated) => {
           this.accept(authenticated);
@@ -76,15 +83,15 @@ export class Session {
   }
 
   signIn(email: string, password: string): Observable<SignedInStudent> {
-    return this.authenticate('/api/auth/login', { email, password });
+    return this.authenticate(`${AUTH_PATH}/login`, { email, password });
   }
 
   signUp(email: string, password: string, name: string): Observable<SignedInStudent> {
-    return this.authenticate('/api/auth/register', { email, password, name });
+    return this.authenticate(`${AUTH_PATH}/register`, { email, password, name });
   }
 
   signOut(): Observable<void> {
-    return this.http.post('/api/auth/logout', {}, { withCredentials: true }).pipe(
+    return this.http.post(`${AUTH_PATH}/logout`, {}, { withCredentials: true }).pipe(
       map(() => undefined),
       // Cleared locally whichever way the request went. A sign-out that visibly fails leaves
       // somebody looking at their own account believing they have left it.
@@ -100,7 +107,10 @@ export class Session {
         this._settled.set(true);
         return authenticated;
       }),
-      catchError((failure: Error) => throwError(() => failure)),
+      // Turned into a sentence here rather than at the screen, so "that email and password do
+      // not match an account" and "could not reach the server" arrive the same way every other
+      // failure in the app does.
+      catchError(readableFailure),
     );
   }
 

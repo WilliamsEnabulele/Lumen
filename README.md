@@ -48,11 +48,17 @@ question, and then picks up exactly where it left off.
 |---|---|
 | `projects/domain` | The rules the client and server both hold: the resume pointer, where an interrupted utterance re-enters, the session state machine, the register ladder |
 | `projects/tutor-voice` | The client half of the tutor: the microphone gate that decides to stop, speech output that knows where it got to, and the session that holds the pointer |
+| `src/app/auth` | The door: the in-memory access token, the interceptor that attaches and refreshes it, and the screen in front of both |
 | `src/app/upload` | Hand over a document and watch it become a lesson |
 | `src/app/tutor` | Being taught: the voice orb, the animated concept canvas, captions, and interrupting |
 | `prototypes/corridor-test` | The original single-file rig. Kept because it is the cheapest way to re-ask the only question that matters |
 
 The backend is a separate repository: **[WilliamsEnabulele/Lumen-BE](https://github.com/WilliamsEnabulele/Lumen-BE)**.
+
+The access token is held in memory and never in storage. Losing it on reload is the point:
+the refresh token that survives the reload is HttpOnly precisely so that a script on the page
+cannot read it, and keeping the short-lived half somewhere a script *can* read gives most of
+that back. A silent refresh at boot is what makes the cost invisible.
 
 Two rules are implemented twice on purpose — `snapBack` and the session state machine exist in
 both TypeScript and C#. Not an oversight: the client has to decide where to resume inside the
