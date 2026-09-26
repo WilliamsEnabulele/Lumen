@@ -120,6 +120,45 @@ export interface EntitlementView {
   readonly freeAllowanceResetsAt: string;
 }
 
+/** One of this student's courses, as the library lists them. */
+export interface CourseSummaryView {
+  readonly id: string;
+  readonly title: string;
+  readonly summary: string;
+  readonly authoredBy: string;
+  readonly createdAt: string;
+}
+
+/**
+ * The two things a student can keep, which are not the same thing.
+ *
+ * A `KeyPoint` is a line the tutor said. The words are the tutor's, so it carries a source
+ * reference and cannot be edited. A `Note` is the student's own, and is theirs to rewrite.
+ */
+export type NoteKind = 'KeyPoint' | 'Note';
+
+export interface StudyNoteView {
+  readonly id: string;
+  readonly kind: NoteKind;
+  readonly body: string;
+  /** What was being taught when it was kept, so a list of them reads as a lesson. */
+  readonly conceptTitle: string | null;
+  readonly sessionId: string | null;
+  /** Where in the material the tutor got it. Null for a student's own note. */
+  readonly sourceRef: string | null;
+  readonly createdAt: string;
+  readonly updatedAt: string;
+}
+
+/** What the client sends to keep something. */
+export interface KeepNote {
+  readonly kind: NoteKind;
+  readonly body: string;
+  readonly conceptTitle?: string | null;
+  readonly sessionId?: string | null;
+  readonly sourceRef?: string | null;
+}
+
 /** Who is signed in, as the server describes them. */
 export interface SignedInStudent {
   readonly id: string;

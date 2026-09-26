@@ -1,4 +1,5 @@
-import { Component, output, signal, inject, OnDestroy } from '@angular/core';
+import { Component, signal, inject, OnDestroy } from '@angular/core';
+import { Router } from '@angular/router';
 import { Paywall } from '../billing/paywall';
 import { IngestionStatus } from 'domain';
 import { Subscription, interval, switchMap } from 'rxjs';
@@ -15,9 +16,7 @@ const POLL_MS = 700;
 })
 export class Upload implements OnDestroy {
   private readonly api = inject(LumenApi);
-
-  /** Fires with the course id once there is a lesson to teach. */
-  readonly ready = output<string>();
+  private readonly router = inject(Router);
 
   readonly status = signal<IngestionStatus | null>(null);
   readonly error = signal<string | null>(null);
@@ -115,7 +114,9 @@ export class Upload implements OnDestroy {
           }
           if (status.ready) {
             this.stopPolling();
-            this.ready.emit(status.courseId);
+            // Straight into the lesson, at its own address. Going back afterwards lands on the
+            // course rather than on an upload form with the document already spent.
+            void this.router.navigate(['/lesson', status.courseId]);
           }
         },
         error: (failure: Error) => {

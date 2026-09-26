@@ -2,7 +2,10 @@ import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import {
   ConceptProgress,
+  CourseSummaryView,
   EntitlementView,
+  KeepNote,
+  StudyNoteView,
   IngestionStatus,
   PaymentView,
   PlanView,
@@ -49,6 +52,49 @@ export class LumenApi {
     return this.http
       .post<TurnTaken>(`${this.base}/sessions/${sessionId}/turn`, { said })
       .pipe(catchError(readableFailure));
+  }
+
+  /** Every course this student has made. The library, and nobody else's. */
+  courses(): Observable<readonly CourseSummaryView[]> {
+    return this.http
+      .get<readonly CourseSummaryView[]>(`${this.base}/courses`)
+      .pipe(catchError(readableFailure));
+  }
+
+  /**
+   * What this student kept from a course.
+   *
+   * Fetched rather than accumulated here, for the same reason progress is. A note written on a
+   * phone is a note that has to be on the laptop, and a copy assembled from whatever this tab
+   * happened to see would disagree with the server the moment anyone else opened it.
+   */
+  notes(courseId: string): Observable<readonly StudyNoteView[]> {
+    return this.http
+      .get<readonly StudyNoteView[]>(`${this.base}/courses/${courseId}/notes`)
+      .pipe(catchError(readableFailure));
+  }
+
+  /**
+   * Keeps a line of the tutor's, or a note of the student's own.
+   *
+   * Keeping the same line twice comes back as the one already kept rather than as a failure,
+   * so a double-pressed button is not something the student has to understand.
+   */
+  keepNote(courseId: string, note: KeepNote): Observable<StudyNoteView> {
+    return this.http
+      .post<StudyNoteView>(`${this.base}/courses/${courseId}/notes`, note)
+      .pipe(catchError(readableFailure));
+  }
+
+  /** Rewrites a note. Refused for a kept line, which is the tutor's words and not ours to edit. */
+  editNote(noteId: string, body: string): Observable<StudyNoteView> {
+    return this.http
+      .put<StudyNoteView>(`${this.base}/notes/${noteId}`, { body })
+      .pipe(catchError(readableFailure));
+  }
+
+  deleteNote(noteId: string): Observable<void> {
+    return this.http.delete<void>(`${this.base}/notes/${noteId}`).pipe(catchError(readableFailure));
   }
 
   plans(): Observable<readonly PlanView[]> {

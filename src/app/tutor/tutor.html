@@ -5,60 +5,125 @@
   </div>
 } @else if (!course()) {
   <div class="centred"><p class="quiet">Opening the lesson…</p></div>
+} @else if (!started()) {
+  <div class="opening">
+    <h1>{{ course()!.courseTitle }}</h1>
+    <p class="summary">{{ course()!.summary }}</p>
+    <button class="primary" (click)="begin()">Start the lesson</button>
+    <p class="meta">
+      {{ steps().length }} concepts · planned by {{ course()!.authoredBy }}
+    </p>
+    @if (micDenied()) {
+      <p class="quiet small">No microphone, so type your questions instead.</p>
+    }
+  </div>
 } @else {
-  <header class="bar">
-    <div class="titles">
-      <span class="course">{{ course()!.courseTitle }}</span>
-      <h1>{{ session.lessonTitle() || course()!.lessonTitle }}</h1>
-    </div>
-    @if (started() && session.conceptTitle()) {
-      <span class="concept">{{ session.conceptTitle() }}</span>
-    }
-    @if (started()) {
-      <button class="ghost small" (click)="toggleStanding()" [attr.aria-expanded]="standingOpen()">
-        {{ standingOpen() ? 'Hide what you have shown' : 'What you have shown' }}
-      </button>
-    }
-  </header>
+  <div class="studio">
+    <!-- ---------------- the plan ---------------- -->
+    <aside class="plan">
+      <section class="card">
+        <header>
+          <p class="eyebrow">Current lesson</p>
+          <h2>{{ session.lessonTitle() || course()!.lessonTitle }}</h2>
+          <p class="from">{{ course()!.courseTitle }}</p>
 
-  @if (standingOpen()) {
-    <section class="standing">
-      <lumen-concept-progress [progress]="standing() ?? []" [loading]="loadingStanding()" />
-    </section>
-  }
+          <div class="through">
+            <div class="row">
+              <span>Through the plan</span>
+              <span class="figure">{{ position() }}%</span>
+            </div>
+            <div class="track"><div class="fill" [style.width.%]="position()"></div></div>
+            <!-- Position, not a mark. What the tutor believes you know is below, in words. -->
+            <p class="caveat">Where the lesson is, not what you have shown.</p>
+          </div>
+        </header>
 
-  <main class="room">
-    <div class="presence">
-      <lumen-voice-orb [mode]="orbMode()" [level]="micLevel()" />
-      @if (started()) {
-        <p class="cue">
-          @switch (orbMode()) {
-            @case ('listening') {
-              @if (session.awaitingAnswer()) { Your turn — take your time } @else { Listening — go ahead }
-            }
-            @case ('thinking') { Thinking }
-            @case ('speaking') { Cut in whenever you like }
-            @default { Waiting }
+        <ol class="steps">
+          @for (step of steps(); track step.concept; let i = $index) {
+            <li
+              [class.current]="i === currentStep()"
+              [class.behind]="i < currentStep()"
+              [class.shown]="shown().has(step.concept)">
+              <span class="pip" aria-hidden="true">
+                @if (shown().has(step.concept)) { ✓ } @else { {{ i + 1 }} }
+              </span>
+              <span class="what">
+                <span class="concept">{{ step.concept }}</span>
+                @if (shown().has(step.concept)) {
+                  <span class="state">You have shown this</span>
+                } @else if (i === currentStep()) {
+                  <span class="state">Being taught now</span>
+                }
+              </span>
+            </li>
           }
-        </p>
-      }
-    </div>
+        </ol>
 
-    <div class="board">
-      @if (!started()) {
-        <div class="opening">
-          <h2>{{ course()!.courseTitle }}</h2>
-          <p>{{ course()!.summary }}</p>
-          <button class="primary" (click)="begin()">Start the lesson</button>
-          <p class="meta">
-            {{ course()!.lessons.length }} lessons · planned by {{ course()!.authoredBy }}
+        <!--
+          No previous and next. The lesson leaves a concept on evidence, and a button that
+          walks past one the student has not shown is a button that undoes the thing the
+          whole progression exists to do.
+        -->
+      </section>
+
+      <section class="card standing">
+        <header class="tight">
+          <h3>What you have shown</h3>
+        </header>
+        <lumen-concept-progress [progress]="standing() ?? []" [loading]="loadingStanding()" />
+      </section>
+    </aside>
+
+    <!-- ---------------- the room ---------------- -->
+    <div class="room">
+      <section class="card tutor-bar">
+        <lumen-voice-orb [mode]="orbMode()" [level]="micLevel()" />
+
+        <div class="who">
+          <p class="name">
+            Tutor
+            <span class="pill" [class]="'is-' + orbMode()">
+              <span class="dot" aria-hidden="true"></span>
+              @switch (orbMode()) {
+                @case ('speaking') { Speaking }
+                @case ('listening') {
+                  @if (session.awaitingAnswer()) { Waiting for you } @else { Listening }
+                }
+                @case ('thinking') { Thinking }
+                @default { Ready }
+              }
+            </span>
           </p>
-          @if (micDenied()) {
-            <p class="quiet small">No microphone, so type your questions instead.</p>
-          }
+          <p class="doing">
+            @if (session.conceptTitle()) {
+              {{ session.conceptTitle() }}
+            } @else {
+              {{ session.lessonTitle() }}
+            }
+          </p>
         </div>
-      } @else {
-        <lumen-tutor-canvas [canvas]="canvas()" [progress]="progress()" />
+
+        <div class="controls">
+          <button type="button" (click)="explainDifferently()" [disabled]="state() === 'complete'">
+            Say it another way
+          </button>
+        </div>
+      </section>
+
+      <section class="card board">
+        <header class="board-bar">
+          <span class="pill" [class.is-speaking]="orbMode() === 'speaking'">
+            <span class="dot" aria-hidden="true"></span>
+            @if (orbMode() === 'speaking') { Tutor is drawing } @else { Canvas }
+          </span>
+          @if (session.sourceRef()) {
+            <span class="source">from {{ session.sourceRef() }}</span>
+          }
+        </header>
+
+        <div class="surface">
+          <lumen-tutor-canvas [canvas]="canvas()" [progress]="progress()" />
+        </div>
 
         @if (marked(); as verdict) {
           <p class="marked" [class]="'verdict-' + verdict.verdict.toLowerCase()">
@@ -77,32 +142,127 @@
         }
 
         @if (state() === 'complete') {
-          <p class="done">
-            That is the end of the course. What you showed along the way is above.
-          </p>
+          <p class="done">That is the end of the course. What you showed along the way is beside it.</p>
         }
-      }
+      </section>
+
+      <!-- ---------------- transcript, key points, notes ---------------- -->
+      <section class="card study">
+        <header class="tabs">
+          <button type="button" [class.on]="tab() === 'transcript'" (click)="tab.set('transcript')">
+            Transcript
+          </button>
+          <button type="button" [class.on]="tab() === 'key-points'" (click)="tab.set('key-points')">
+            Key points
+            @if (keyPoints().length) { <span class="count">{{ keyPoints().length }}</span> }
+          </button>
+          <button type="button" [class.on]="tab() === 'notes'" (click)="tab.set('notes')">
+            Notes
+            @if (ownNotes().length) { <span class="count">{{ ownNotes().length }}</span> }
+          </button>
+
+          @if (tab() === 'transcript') {
+            <span class="pill is-speaking live"><span class="dot" aria-hidden="true"></span>Live</span>
+          }
+        </header>
+
+        @if (noteError(); as message) {
+          <p class="failed" role="alert">{{ message }}</p>
+        }
+
+        @switch (tab()) {
+          @case ('transcript') {
+            <div class="lines">
+              @for (line of transcript(); track line.id; let last = $last) {
+                <article class="line">
+                  <!--
+                    The line being spoken is the last line of the transcript, not a second copy
+                    of it underneath. Rendering the caption separately showed every utterance
+                    twice, which reads as the tutor repeating itself.
+                  -->
+                  @if (last && line.said === session.said()) {
+                    <p class="said"><span class="spoken">{{ session.spokenText() }}</span
+                      ><span class="ahead">{{ session.pendingText() }}</span></p>
+                  } @else {
+                    <p class="said">{{ line.said }}</p>
+                  }
+                  <div class="under">
+                    @if (line.conceptTitle) { <span class="concept">{{ line.conceptTitle }}</span> }
+                    @if (kept().has(line.said.trim().toLowerCase())) {
+                      <span class="already">Kept</span>
+                    } @else {
+                      <button type="button" class="link" (click)="keep(line)">Save as key point</button>
+                    }
+                  </div>
+                </article>
+              } @empty {
+                <p class="quiet">Nothing said yet.</p>
+              }
+            </div>
+          }
+
+          @case ('key-points') {
+            <div class="kept-list">
+              @for (note of keyPoints(); track note.id) {
+                <article class="kept">
+                  <p class="body">{{ note.body }}</p>
+                  <div class="under">
+                    @if (note.conceptTitle) { <span class="concept">{{ note.conceptTitle }}</span> }
+                    @if (note.sourceRef) { <span class="cite">{{ note.sourceRef }}</span> }
+                    <button type="button" class="link quiet-link" (click)="removeNote(note)">Remove</button>
+                  </div>
+                </article>
+              } @empty {
+                <p class="quiet">
+                  Nothing kept yet. When the tutor says something that lands, save it from the
+                  transcript — it will be here the next time you open this course.
+                </p>
+              }
+            </div>
+          }
+
+          @case ('notes') {
+            <div class="own">
+              <div class="writing">
+                <textarea
+                  id="note"
+                  name="note"
+                  rows="3"
+                  placeholder="Something to come back to…"
+                  [ngModel]="noteDraft()"
+                  (ngModelChange)="noteDraft.set($event)"></textarea>
+                <button type="button" class="primary" [disabled]="!noteDraft().trim()" (click)="addNote()">
+                  Keep this
+                </button>
+              </div>
+
+              @for (note of ownNotes(); track note.id) {
+                <article class="kept">
+                  <p class="body">{{ note.body }}</p>
+                  <div class="under">
+                    @if (note.conceptTitle) { <span class="concept">{{ note.conceptTitle }}</span> }
+                    <button type="button" class="link quiet-link" (click)="removeNote(note)">Remove</button>
+                  </div>
+                </article>
+              } @empty {
+                <p class="quiet">Your own notes on this course will live here.</p>
+              }
+            </div>
+          }
+        }
+
+        <div class="ask">
+          <input
+            id="ask"
+            name="ask"
+            [ngModel]="question()"
+            (ngModelChange)="question.set($event)"
+            (keydown.enter)="ask()"
+            placeholder="Cut in whenever — say it, or type it"
+            autocomplete="off" />
+          <button type="button" class="primary" (click)="ask()">Ask</button>
+        </div>
+      </section>
     </div>
-  </main>
-
-  @if (started()) {
-    <footer class="caption">
-      <p class="said">
-        <span class="spoken">{{ session.spokenText() }}</span
-        ><span class="ahead">{{ session.pendingText() }}</span>
-      </p>
-
-      <div class="ask">
-        <input
-          id="ask"
-          name="ask"
-          [ngModel]="question()"
-          (ngModelChange)="question.set($event)"
-          (keydown.enter)="ask()"
-          placeholder="Say something — or type it"
-          autocomplete="off" />
-        <button class="ghost" (click)="ask()">Send</button>
-      </div>
-    </footer>
-  }
+  </div>
 }

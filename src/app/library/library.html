@@ -1,0 +1,41 @@
+<section class="page">
+  <header>
+    <h1>Your courses</h1>
+    <p class="lede">Everything you have handed over, and what it became.</p>
+  </header>
+
+  @if (error(); as message) {
+    <div class="failed">
+      <h2>Those could not be loaded</h2>
+      <p>{{ message }}</p>
+    </div>
+  } @else if (courses() === null) {
+    <p class="waiting">Fetching your courses…</p>
+  } @else if (empty()) {
+    <div class="nothing">
+      <h2>Nothing here yet</h2>
+      <p>
+        Hand over a chapter, a set of notes or a deck. Lumen reads it, works out what it
+        teaches, and then teaches it to you out loud — and you can stop it and ask at any point.
+      </p>
+      <a class="start" routerLink="/new">Hand over a document</a>
+    </div>
+  } @else {
+    <ul class="courses">
+      @for (course of courses(); track course.id) {
+        <li>
+          <a [routerLink]="['/lesson', course.id]">
+            <h2>{{ course.title }}</h2>
+            <p class="summary">{{ course.summary }}</p>
+            <p class="meta">
+              @if (made(course); as when) {
+                <span>{{ when }}</span>
+              }
+              <span class="author">planned by {{ course.authoredBy }}</span>
+            </p>
+          </a>
+        </li>
+      }
+    </ul>
+  }
+</section>

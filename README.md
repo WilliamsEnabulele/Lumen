@@ -49,6 +49,8 @@ question, and then picks up exactly where it left off.
 | `projects/domain` | The rules the client and server both hold: the resume pointer, where an interrupted utterance re-enters, the session state machine, the register ladder |
 | `projects/tutor-voice` | The client half of the tutor: the microphone gate that decides to stop, speech output that knows where it got to, and the session that holds the pointer |
 | `src/app/auth` | The door: the in-memory access token, the interceptor that attaches and refreshes it, and the screen in front of both |
+| `src/app/shell` | The bar across the top, carrying only what there is somewhere to go to |
+| `src/app/library` | Every course you have made, so finishing a lesson is not the same as losing it |
 | `src/app/upload` | Hand over a document and watch it become a lesson |
 | `src/app/tutor` | Being taught: the voice orb, the animated concept canvas, captions, and interrupting |
 | `prototypes/corridor-test` | The original single-file rig. Kept because it is the cheapest way to re-ask the only question that matters |
@@ -76,6 +78,33 @@ npm test             # domain, tutor-voice, then the app
 
 Run the backend from [Lumen-BE](https://github.com/WilliamsEnabulele/Lumen-BE) alongside it —
 `dotnet run --project Lumen.Api`. Tests run in headless Chromium.
+
+## The lesson screen
+
+Three zones, and a deliberate omission in each.
+
+**The plan**, down the left: every concept in teaching order, what is being taught now, and a
+tick against the ones this student has actually demonstrated. It has no previous and next.
+The lesson leaves a concept on evidence, and a button that walks past one nobody has shown
+undoes the thing the whole progression exists to do.
+
+**The room**: the tutor's state, the canvas it is drawing on, and one control — *say it another
+way*, which goes to the server as a turn rather than as a mode, because a student saying they
+did not follow is the same kind of event as anything else they say. A separate switch would be
+a second way into the reteach path, and a reteach path nothing could reach is a bug this
+project has already shipped once.
+
+There is no transport. No scrubber, no skip, no playback speed: none of it is pre-recorded, and
+a progress bar you can drag implies a lesson that has already happened.
+
+**Transcript, key points and notes**, along the bottom, with the ask-anything box under all
+three so cutting in is never more than one click away. The transcript is this sitting. What
+outlives it is what the student chose to keep, which goes to the server.
+
+The bar over the plan is **position through the plan, never belief**. What the tutor believes
+somebody knows is rendered in words, by `standing` in `projects/domain` — a belief drawn as a
+filled bar gets read as a score out of a hundred, and arguing with it as though it were one is
+the wrong argument. `throughPlan` is beside it and says so.
 
 ## The flow
 

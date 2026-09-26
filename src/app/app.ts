@@ -1,24 +1,23 @@
 import { Component, inject, signal } from '@angular/core';
+import { Router, RouterOutlet } from '@angular/router';
 import { Paid } from './billing/paid';
 import { SignIn } from './auth/sign-in';
 import { Session } from './auth/session';
-import { Tutor } from './tutor/tutor';
-import { Upload } from './upload/upload';
+import { TopBar } from './shell/top-bar';
 
 /**
- * Which of the three things the app is doing, once there is somebody to do it for.
+ * What is in front of the router, and why anything is.
  *
- * Deliberately a switch rather than a router: there are three states, one of them is reached
- * by being sent back from a payment provider, and a router would add a dependency and a set of
- * URLs to maintain for a decision this small.
- *
- * In front of all three is the door. Every read on the server is scoped to an owner, so an app
- * shown to nobody in particular is an app where every request comes back 401 — the gate is
- * here rather than at each call site because there is no useful screen behind it.
+ * Two things sit outside routing on purpose. The door, because every read on the server is
+ * scoped to an owner and an app shown to nobody in particular is an app where every request
+ * comes back 401 — there is no useful screen behind the gate to give an address to. And the
+ * return from the payment provider, because which query parameter comes back is the provider's
+ * decision rather than ours, and a route that only matches when a third party spells something
+ * the way we expected is a route that strands the one person who has already paid.
  */
 @Component({
   selector: 'app-root',
-  imports: [Upload, Tutor, Paid, SignIn],
+  imports: [Paid, SignIn, TopBar, RouterOutlet],
   template: `
     @if (!session.settled()) {
       <!--
@@ -29,18 +28,11 @@ import { Upload } from './upload/upload';
       <p class="waking">Signing you back in…</p>
     } @else if (!session.isSignedIn()) {
       <lumen-sign-in />
+    } @else if (paymentReference(); as reference) {
+      <lumen-paid [reference]="reference" (done)="leavePayment()" />
     } @else {
-      @if (paymentReference(); as reference) {
-        <lumen-paid [reference]="reference" (done)="paymentReference.set(null)" />
-      } @else if (courseId(); as id) {
-        <lumen-tutor [courseId]="id" />
-      } @else {
-        <header class="account">
-          <span class="who">{{ session.student()?.name || session.student()?.email }}</span>
-          <button class="ghost" type="button" (click)="signOut()">Sign out</button>
-        </header>
-        <lumen-upload (ready)="courseId.set($event)" />
-      }
+      <lumen-top-bar />
+      <router-outlet />
     }
   `,
   styles: [
@@ -71,44 +63,12 @@ import { Upload } from './upload/upload';
         }
       }
 
-      /*
-        Only over the upload screen. The tutor view is a room with a bar of its own, and two
-        bars stacked at the top of a lesson is one more than anybody needs while being taught.
-      */
-      .account {
-        display: flex;
-        align-items: center;
-        justify-content: flex-end;
-        gap: 12px;
-        padding: 12px 20px;
-      }
-
-      .who {
-        font-size: 13px;
-        color: var(--subtle-foreground);
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-      }
-
-      .ghost {
-        border: 0;
-        background: none;
-        color: var(--muted-foreground);
-        font-size: 13px;
-        padding: 4px 6px;
-      }
-      .ghost:hover {
-        color: var(--foreground);
-      }
     `,
   ],
 })
 export class App {
   readonly session = inject(Session);
-
-  /** Set once a document has become a lesson. Until then there is nothing to teach. */
-  readonly courseId = signal<string | null>(null);
+  private readonly router = inject(Router);
 
   /**
    * Set when this load is a return from the payment provider.
@@ -125,15 +85,16 @@ export class App {
     this.session.restore();
   }
 
-  signOut(): void {
-    // Cleared here and not only in the session, because a course id is one student's. Leaving
-    // it set would drop whoever signs in next straight into the last person's lesson — and the
-    // server would refuse every request in it, which looks like a broken app rather than the
-    // sign-out that actually happened.
-    this.courseId.set(null);
+  /**
+   * Done looking at the payment.
+   *
+   * Sent to the library rather than left where they were. This load began at whatever address
+   * the provider redirected to, which is not an address in this app, and leaving them on it
+   * means the next reload shows the payment page again.
+   */
+  leavePayment(): void {
     this.paymentReference.set(null);
-
-    this.session.signOut().subscribe();
+    void this.router.navigate(['/library']);
   }
 }
 

@@ -2,229 +2,511 @@
   display: flex;
   flex-direction: column;
   flex: 1;
+  min-height: 0;
 }
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+}
+
+.quiet { color: var(--muted-foreground); margin: 0; }
+.small { font-size: 13px; }
 
 .centred {
   margin: auto;
   text-align: center;
   padding: 48px 16px;
 
-  h2 {
-    font-family: var(--sans);
-    font-weight: 600;
-    font-size: 22px;
-    margin: 0 0 8px;
-  }
+  h2 { margin: 0 0 8px; font-size: 18px; font-weight: 600; letter-spacing: -0.02em; }
 }
-.quiet { color: var(--muted-foreground); margin: 0; }
-.small { font-size: 13px; }
 
-/* ---- bar ---- */
-.bar {
-  display: flex;
-  align-items: flex-start;
-  gap: 16px;
-  padding: 18px 24px;
-  border-bottom: 1px solid var(--border);
-
-  .titles { margin-right: auto; }
-
-  .course {
-    display: block;
-    font-family: var(--mono);
-    font-size: 10.5px;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    color: var(--subtle-foreground);
-    margin-bottom: 4px;
-  }
+/* ---------------- opening ---------------- */
+.opening {
+  margin: auto;
+  max-width: 560px;
+  padding: 56px 24px;
+  text-align: center;
 
   h1 {
-    font-family: var(--sans);
-    font-size: 19px;
-    font-weight: 600;
-    margin: 0;
-    letter-spacing: -0.005em;
-  }
-}
-
-/* ---- the room ---- */
-.room {
-  flex: 1;
-  display: grid;
-  grid-template-columns: 220px 1fr;
-  gap: 40px;
-  align-items: center;
-  padding: 48px 32px;
-  max-width: 1100px;
-  width: 100%;
-  margin: 0 auto;
-
-  @media (max-width: 860px) {
-    grid-template-columns: 1fr;
-    gap: 28px;
-    padding: 32px 16px;
-    align-items: start;
-  }
-}
-
-.presence {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 14px;
-
-  @media (max-width: 860px) {
-    lumen-voice-orb { max-width: 120px; }
-  }
-}
-
-.cue {
-  font-family: var(--mono);
-  font-size: 11px;
-  letter-spacing: 0.06em;
-  color: var(--subtle-foreground);
-  margin: 0;
-  text-align: center;
-  max-width: 18ch;
-  line-height: 1.5;
-}
-
-.board { min-width: 0; }
-
-.opening {
-  max-width: 44ch;
-
-  h2 {
-    font-family: var(--sans);
-    font-size: 28px;
-    font-weight: 600;
-    letter-spacing: -0.015em;
     margin: 0 0 12px;
+    font-size: 26px;
+    font-weight: 600;
+    letter-spacing: -0.025em;
+    line-height: 1.2;
     text-wrap: balance;
   }
 
-  p {
+  .summary {
+    margin: 0 auto 26px;
+    max-width: 48ch;
     color: var(--muted-foreground);
     line-height: 1.6;
-    margin: 0 0 22px;
-    text-wrap: pretty;
+  }
+
+  .meta {
+    margin: 18px 0 0;
+    font-family: var(--mono);
+    font-size: 11.5px;
+    color: var(--subtle-foreground);
   }
 }
 
-/* ---- an answer to an interruption ---- */
-.degraded,
-.done {
-  margin: 24px 0 0;
-  font-family: var(--mono);
+/* ---------------- the frame ---------------- */
+.studio {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 14px 16px 32px;
+  flex: 1;
+  min-height: 0;
+}
+
+.plan {
+  width: 300px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  position: sticky;
+  top: 14px;
+}
+
+.room {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* ---------------- plan ---------------- */
+.plan header {
+  padding: 16px 16px 14px;
+  border-bottom: 1px solid var(--border);
+
+  &.tight { border-bottom: 0; padding-bottom: 6px; }
+}
+
+.eyebrow {
+  margin: 0 0 6px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--subtle-foreground);
+}
+
+.plan h2 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  line-height: 1.3;
+}
+
+.plan h3 {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.from {
+  margin: 3px 0 0;
   font-size: 12px;
-  color: var(--subtle-foreground);
+  color: var(--muted-foreground);
 }
 
-.concept {
-  font-family: var(--mono);
-  font-size: 11px;
-  letter-spacing: 0.06em;
-  color: var(--subtle-foreground);
-  align-self: center;
+.through {
+  margin-top: 14px;
+
+  .row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    color: var(--muted-foreground);
+    margin-bottom: 6px;
+  }
+
+  .figure { font-weight: 600; color: var(--foreground); font-variant-numeric: tabular-nums; }
+
+  .track {
+    height: 5px;
+    border-radius: 999px;
+    background: var(--muted);
+    overflow: hidden;
+  }
+
+  .fill {
+    height: 100%;
+    background: var(--primary);
+    border-radius: 999px;
+    transition: width 0.4s ease;
+  }
+
+  .caveat {
+    margin: 7px 0 0;
+    font-size: 11px;
+    color: var(--subtle-foreground);
+    line-height: 1.4;
+  }
 }
 
-.meta {
-  margin: 18px 0 0;
-  font-family: var(--mono);
-  font-size: 11px;
-  color: var(--subtle-foreground);
+.steps {
+  list-style: none;
+  margin: 0;
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+
+  li {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 8px 10px;
+    border-radius: var(--radius-md);
+  }
+
+  li.current {
+    background: var(--secondary);
+
+    .concept { font-weight: 600; }
+  }
+
+  .pip {
+    width: 21px;
+    height: 21px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 600;
+    background: var(--muted);
+    color: var(--muted-foreground);
+  }
+
+  li.current .pip { background: var(--primary); color: var(--primary-foreground); }
+  li.shown .pip { background: var(--success); color: #fff; }
+
+  .what { min-width: 0; }
+
+  .concept {
+    display: block;
+    font-size: 13px;
+    line-height: 1.35;
+    color: var(--foreground);
+  }
+
+  li:not(.current):not(.shown):not(.behind) .concept { color: var(--muted-foreground); }
+
+  .state {
+    display: block;
+    margin-top: 2px;
+    font-size: 11px;
+    color: var(--muted-foreground);
+  }
 }
 
-/* ---- caption + ask ---- */
-.caption {
-  border-top: 1px solid var(--border);
-  padding: 16px 24px calc(16px + env(safe-area-inset-bottom, 0px));
-  background: var(--surface);
+.standing { padding-bottom: 8px; }
+
+/* ---------------- tutor bar ---------------- */
+.tutor-bar {
   display: flex;
   align-items: center;
-  gap: 20px;
-  flex-wrap: wrap;
+  gap: 14px;
+  padding: 12px 16px;
+
+  /* The orb is a status light here rather than the centrepiece it was on a screen of its own. */
+  lumen-voice-orb {
+    width: 44px;
+    flex-shrink: 0;
+  }
 }
 
-.said {
-  flex: 1 1 320px;
-  margin: 0;
-  font-size: 14.5px;
-  line-height: 1.55;
-  max-height: 3em;
-  overflow: hidden;
+.who {
+  min-width: 0;
+  margin-right: auto;
 
+  .name {
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    font-size: 13.5px;
+    font-weight: 600;
+  }
+
+  .doing {
+    margin: 2px 0 0;
+    font-size: 13px;
+    color: var(--muted-foreground);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+/* The live marker. One shape, wherever something is actually happening. */
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11.5px;
+  font-weight: 500;
+  color: var(--muted-foreground);
+
+  .dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+  }
+
+  &.is-speaking,
+  &.live {
+    color: var(--success);
+
+    .dot { animation: pulse 1.6s ease-in-out infinite; }
+  }
+
+  &.is-listening { color: var(--success); }
+  &.is-thinking { color: var(--primary); }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pill .dot { animation: none; }
+}
+
+.controls button { font-size: 13px; }
+
+/* ---------------- board ---------------- */
+.board { padding: 0 0 14px; overflow: hidden; }
+
+.board-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.source {
+  margin-left: auto;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--subtle-foreground);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.surface {
+  background: var(--background);
+  background-image: radial-gradient(color-mix(in oklab, var(--border-strong) 70%, transparent) 1px, transparent 1px);
+  background-size: 22px 22px;
+  padding: 22px;
+  min-height: 210px;
+  display: flex;
+  flex-direction: column;
+}
+
+.marked {
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
+  margin: 14px 16px 0;
+  font-size: 13px;
+  color: var(--muted-foreground);
+
+  .badge {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 2px 7px;
+    border-radius: var(--radius);
+    color: var(--foreground);
+    background: var(--muted);
+  }
+
+  &.verdict-correct .badge { background: var(--success-bg); color: var(--success); }
+  &.verdict-partial .badge { background: color-mix(in oklab, #c88a1e 26%, transparent); }
+  &.verdict-incorrect .badge { background: var(--critical-bg); color: var(--critical); }
+  &.verdict-noanswer .badge { opacity: 0.7; }
+}
+
+.moved {
+  margin: 8px 16px 0;
+  font-size: 12.5px;
+  font-style: italic;
+  color: var(--muted-foreground);
+}
+
+.degraded,
+.done {
+  margin: 12px 16px 0;
+  font-family: var(--mono);
+  font-size: 11.5px;
+  color: var(--subtle-foreground);
+}
+
+/* ---------------- study panel ---------------- */
+.study { display: flex; flex-direction: column; }
+
+.tabs {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 12px 0;
+  border-bottom: 1px solid var(--border);
+
+  button {
+    border: 0;
+    background: none;
+    padding: 8px 10px 10px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--muted-foreground);
+    border-bottom: 2px solid transparent;
+    border-radius: 0;
+    margin-bottom: -1px;
+
+    &.on {
+      color: var(--foreground);
+      font-weight: 600;
+      border-bottom-color: var(--primary);
+    }
+  }
+
+  .count {
+    margin-left: 5px;
+    font-size: 11px;
+    padding: 1px 5px;
+    border-radius: 999px;
+    background: var(--muted);
+    color: var(--muted-foreground);
+  }
+
+  .live { margin-left: auto; padding-bottom: 8px; }
+}
+
+.lines,
+.kept-list,
+.own {
+  padding: 12px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 320px;
+  overflow-y: auto;
+}
+
+.line,
+.kept {
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 10px;
+
+  &:last-of-type { border-bottom: 0; padding-bottom: 0; }
+}
+
+.said,
+.body {
+  margin: 0;
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: var(--foreground);
+  white-space: pre-wrap;
+}
+
+.under {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 6px;
+  font-size: 11.5px;
+  color: var(--subtle-foreground);
+}
+
+.concept { color: var(--muted-foreground); }
+.cite { font-family: var(--mono); font-size: 10.5px; }
+.already { color: var(--success); font-weight: 500; }
+
+.link {
+  border: 0;
+  background: none;
+  padding: 0;
+  font-size: 11.5px;
+  font-weight: 500;
+  color: var(--primary);
+  margin-left: auto;
+
+  &:hover { text-decoration: underline; }
+}
+
+.quiet-link { color: var(--subtle-foreground); }
+
+/* The half of the current line that has not been spoken yet, greyed ahead of the voice. */
+.said {
   .spoken { color: var(--foreground); }
   .ahead { color: var(--subtle-foreground); }
+}
+
+.writing {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: flex-end;
+
+  textarea {
+    width: 100%;
+    font: inherit;
+    font-size: 13.5px;
+    line-height: 1.55;
+    padding: 9px 11px;
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-md);
+    background: var(--background);
+    color: var(--foreground);
+    resize: vertical;
+  }
+}
+
+.failed {
+  margin: 10px 16px 0;
+  font-size: 12.5px;
+  color: var(--critical);
 }
 
 .ask {
   display: flex;
   gap: 8px;
-  flex: 0 1 340px;
+  padding: 12px 16px;
+  border-top: 1px solid var(--border);
 
   input {
     flex: 1;
     min-width: 0;
-    font-family: var(--sans);
-    font-size: 14px;
-    padding: 8px 12px;
+    font: inherit;
+    font-size: 13.5px;
+    padding: 9px 12px;
     border: 1px solid var(--border-strong);
-    border-radius: 8px;
+    border-radius: var(--radius-md);
     background: var(--background);
     color: var(--foreground);
   }
 }
 
-.ghost {
-  background: transparent;
-  border-color: var(--border-strong);
-}
-
-/* What just happened to the student's standing, in the student's words. A mastery estimate
-   that moves invisibly is one nobody can argue with, and being moved past a concept without
-   being told is the thing that makes a tutor feel like it stopped paying attention. */
-.marked {
-  display: flex;
-  align-items: baseline;
-  gap: 0.6rem;
-  margin: 0.75rem 0 0;
-  font-size: 0.9rem;
-  color: var(--muted-foreground);
-
-  .badge {
-    flex: none;
-    padding: 0.1rem 0.5rem;
-    border-radius: 999px;
-    font-size: 0.72rem;
-    font-weight: 600;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-    background: color-mix(in oklab, var(--muted-foreground) 18%, transparent);
-    color: var(--foreground);
-  }
-
-  &.verdict-correct .badge { background: color-mix(in oklab, #2f9e63 26%, transparent); }
-  &.verdict-partial .badge { background: color-mix(in oklab, #c88a1e 26%, transparent); }
-  &.verdict-incorrect .badge { background: color-mix(in oklab, #c4543e 26%, transparent); }
-  &.verdict-noanswer .badge { opacity: 0.7; }
-}
-
-.moved {
-  margin: 0.4rem 0 0;
-  font-size: 0.85rem;
-  font-style: italic;
-  color: var(--muted-foreground);
-}
-
-/* The progress report, opened from the bar. A panel rather than a page: it is a thing to
-   glance at mid-lesson and argue with, not somewhere to be sent. */
-.standing {
-  flex: none;
-  padding: 20px 24px;
-  border-bottom: 1px solid var(--border);
-  background: var(--background);
-  max-height: 46vh;
-  overflow-y: auto;
+/* The sidebar stops being a sidebar before it stops being readable. */
+@media (max-width: 900px) {
+  .studio { flex-direction: column; padding-inline: 12px; }
+  .plan { width: 100%; position: static; }
+  .room { width: 100%; }
 }

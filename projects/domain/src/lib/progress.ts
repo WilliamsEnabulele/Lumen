@@ -77,3 +77,29 @@ export function standing(progress: ConceptProgress): ConceptStanding {
 export function worthRevisiting(progress: readonly ConceptProgress[]): readonly ConceptProgress[] {
   return progress.filter((record) => record.movedOnUnmastered || (!record.mastered && record.evidence.length > 0));
 }
+
+/**
+ * How far through the plan a lesson has got, as a percentage.
+ *
+ * Position, and deliberately never belief. What the server believes a student knows is
+ * rendered in words by `standing` above, for a reason that applies twice as hard to a bar: a
+ * belief shown as a filled bar reads as a score out of a hundred, and arguing with it as
+ * though it were one is the wrong argument. How many concepts the lesson has walked past is a
+ * plain fact about the lesson, and a bar is the right shape for exactly that.
+ *
+ * Here rather than in the component because it is the kind of thing that gets quietly changed
+ * to "and it looks better if we mix in the mastery" by somebody who did not read the reason.
+ *
+ * @param total how many concepts the plan has
+ * @param currentIndex which one is being taught, or -1 before the first
+ * @param complete whether the course is finished, which is the only thing that reads 100
+ */
+export function throughPlan(total: number, currentIndex: number, complete: boolean): number {
+  if (total <= 0) return 0;
+  if (complete) return 100;
+
+  // Concepts *behind* the current one are the ones that have been covered. Counting the
+  // current one would show a lesson as finished on the moment its last concept was opened.
+  const covered = Math.min(Math.max(currentIndex, 0), total);
+  return Math.round((covered / total) * 100);
+}
