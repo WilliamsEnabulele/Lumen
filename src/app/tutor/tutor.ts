@@ -114,6 +114,10 @@ export class Tutor implements OnDestroy {
   readonly noteDraft = signal('');
   readonly noteError = signal<string | null>(null);
 
+  /** The note being rewritten, if any. Key points are never in here — they are not ours to edit. */
+  readonly editing = signal<string | null>(null);
+  readonly editDraft = signal('');
+
   readonly keyPoints = computed(() => this.notes().filter((note) => note.kind === 'KeyPoint'));
   readonly ownNotes = computed(() => this.notes().filter((note) => note.kind === 'Note'));
 
@@ -251,6 +255,17 @@ export class Tutor implements OnDestroy {
     this.notes.update((all) => [note, ...all.filter((it) => it.id !== note.id)]);
   }
 
+  /**
+   * Puts a rewritten note back where it was.
+   *
+   * Not `remember`, which moves what it is given to the front. The server orders these by when
+   * they were kept and rewriting one does not change that, so a note that jumped to the top
+   * every time a typo was fixed would be disagreeing with the order it comes back in.
+   */
+  private replace(note: StudyNoteView): void {
+    this.notes.update((all) => all.map((it) => (it.id === note.id ? note : it)));
+  }
+
   private loadNotes(): void {
     this.api.notes(this.courseId()).subscribe({
       next: (notes) => this.notes.set(notes),
@@ -328,6 +343,32 @@ export class Tutor implements OnDestroy {
         },
         error: (failure: Error) => this.noteError.set(failure.message),
       });
+  }
+
+  /** Opens a note for rewriting, with what it currently says already in the box. */
+  beginEdit(note: StudyNoteView): void {
+    this.editing.set(note.id);
+    this.editDraft.set(note.body);
+    this.noteError.set(null);
+  }
+
+  cancelEdit(): void {
+    this.editing.set(null);
+    this.editDraft.set('');
+  }
+
+  saveEdit(note: StudyNoteView): void {
+    const body = this.editDraft().trim();
+    if (!body) return;
+
+    this.api.editNote(note.id, body).subscribe({
+      next: (saved) => {
+        this.editing.set(null);
+        this.editDraft.set('');
+        this.replace(saved);
+      },
+      error: (failure: Error) => this.noteError.set(failure.message),
+    });
   }
 
   removeNote(note: StudyNoteView): void {

@@ -305,7 +305,9 @@
   font-size: 11.5px;
   font-weight: 500;
   color: var(--primary);
-  margin-left: auto;
+
+  /* The first of them pushes right; any after it sit beside it rather than stacking. */
+  &:first-of-type { margin-left: auto; }
 
   &:hover { text-decoration: underline; }
 }
@@ -323,6 +325,12 @@
   flex-direction: column;
   gap: 8px;
   align-items: flex-end;
+
+  .row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
 
   textarea {
     width: 100%;

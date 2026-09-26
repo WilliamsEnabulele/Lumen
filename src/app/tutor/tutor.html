@@ -194,11 +194,33 @@
 
               @for (note of ownNotes(); track note.id) {
                 <article class="kept">
-                  <p class="body">{{ note.body }}</p>
-                  <div class="under">
-                    @if (note.conceptTitle) { <span class="concept">{{ note.conceptTitle }}</span> }
-                    <button type="button" class="link quiet-link" (click)="removeNote(note)">Remove</button>
-                  </div>
+                  @if (editing() === note.id) {
+                    <!--
+                      Only your own notes open like this. A key point is the tutor's words and
+                      the server refuses to rewrite one, so offering the button would be
+                      offering something that comes back as a refusal.
+                    -->
+                    <div class="writing">
+                      <textarea
+                        rows="3"
+                        aria-label="Rewrite this note"
+                        [ngModel]="editDraft()"
+                        (ngModelChange)="editDraft.set($event)"></textarea>
+                      <div class="row">
+                        <button type="button" class="link quiet-link" (click)="cancelEdit()">Cancel</button>
+                        <button type="button" class="primary" [disabled]="!editDraft().trim()" (click)="saveEdit(note)">
+                          Save
+                        </button>
+                      </div>
+                    </div>
+                  } @else {
+                    <p class="body">{{ note.body }}</p>
+                    <div class="under">
+                      @if (note.conceptTitle) { <span class="concept">{{ note.conceptTitle }}</span> }
+                      <button type="button" class="link" (click)="beginEdit(note)">Edit</button>
+                      <button type="button" class="link quiet-link" (click)="removeNote(note)">Remove</button>
+                    </div>
+                  }
                 </article>
               } @empty {
                 <p class="quiet">Your own notes on this course will live here.</p>
