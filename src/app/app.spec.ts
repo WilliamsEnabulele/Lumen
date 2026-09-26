@@ -37,24 +37,26 @@ describe('App', () => {
     http.expectOne(`${AUTH_PATH}/refresh`).flush(null, unauthorized);
   });
 
-  it('asks to sign in when nobody is, and offers no navigation to sign in from', () => {
+  it('asks to sign in when nobody is, and routes nowhere behind it', () => {
     const fixture = TestBed.createComponent(App);
     fixture.detectChanges();
     restore(fixture, null);
 
     expect(fixture.nativeElement.querySelector('lumen-sign-in')).toBeTruthy();
-    // The bar carries a sign-out and a link to somebody's library. Neither means anything yet.
-    expect(fixture.nativeElement.querySelector('lumen-top-bar')).toBeFalsy();
+    // Nothing is routed while nobody is signed in, so no page can render its own requests
+    // against a server that would refuse all of them.
+    expect(fixture.nativeElement.querySelector('router-outlet')).toBeFalsy();
   });
 
-  it('opens the app for somebody whose refresh cookie is still good', () => {
+  it('hands over to the router for somebody whose refresh cookie is still good', () => {
     const fixture = TestBed.createComponent(App);
     fixture.detectChanges();
     restore(fixture, authenticated);
 
-    // A reload is not a sign-out. The access token is gone, the cookie is not.
+    // A reload is not a sign-out. The access token is gone, the cookie is not. Past the gate,
+    // App renders nothing of its own — the chrome belongs to the shell layout.
     expect(fixture.nativeElement.querySelector('lumen-sign-in')).toBeFalsy();
-    expect(fixture.nativeElement.querySelector('lumen-top-bar')).toBeTruthy();
+    expect(fixture.nativeElement.querySelector('router-outlet')).toBeTruthy();
   });
 
   function restore(fixture: ComponentFixture<App>, body: object | null): void {

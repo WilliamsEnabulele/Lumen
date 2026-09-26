@@ -3,7 +3,6 @@ import { Router, RouterOutlet } from '@angular/router';
 import { Paid } from './billing/paid';
 import { SignIn } from './auth/sign-in';
 import { Session } from './auth/session';
-import { TopBar } from './shell/top-bar';
 
 /**
  * What is in front of the router, and why anything is.
@@ -17,7 +16,7 @@ import { TopBar } from './shell/top-bar';
  */
 @Component({
   selector: 'app-root',
-  imports: [Paid, SignIn, TopBar, RouterOutlet],
+  imports: [Paid, SignIn, RouterOutlet],
   template: `
     @if (!session.settled()) {
       <!--
@@ -31,7 +30,7 @@ import { TopBar } from './shell/top-bar';
     } @else if (paymentReference(); as reference) {
       <lumen-paid [reference]="reference" (done)="leavePayment()" />
     } @else {
-      <lumen-top-bar />
+      <!-- The chrome lives in the shell layout, which every routed page is a child of. -->
       <router-outlet />
     }
   `,

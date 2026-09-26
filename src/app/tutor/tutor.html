@@ -20,59 +20,15 @@
 } @else {
   <div class="studio">
     <!-- ---------------- the plan ---------------- -->
-    <aside class="plan">
-      <section class="card">
-        <header>
-          <p class="eyebrow">Current lesson</p>
-          <h2>{{ session.lessonTitle() || course()!.lessonTitle }}</h2>
-          <p class="from">{{ course()!.courseTitle }}</p>
-
-          <div class="through">
-            <div class="row">
-              <span>Through the plan</span>
-              <span class="figure">{{ position() }}%</span>
-            </div>
-            <div class="track"><div class="fill" [style.width.%]="position()"></div></div>
-            <!-- Position, not a mark. What the tutor believes you know is below, in words. -->
-            <p class="caveat">Where the lesson is, not what you have shown.</p>
-          </div>
-        </header>
-
-        <ol class="steps">
-          @for (step of steps(); track step.concept; let i = $index) {
-            <li
-              [class.current]="i === currentStep()"
-              [class.behind]="i < currentStep()"
-              [class.shown]="shown().has(step.concept)">
-              <span class="pip" aria-hidden="true">
-                @if (shown().has(step.concept)) { ✓ } @else { {{ i + 1 }} }
-              </span>
-              <span class="what">
-                <span class="concept">{{ step.concept }}</span>
-                @if (shown().has(step.concept)) {
-                  <span class="state">You have shown this</span>
-                } @else if (i === currentStep()) {
-                  <span class="state">Being taught now</span>
-                }
-              </span>
-            </li>
-          }
-        </ol>
-
-        <!--
-          No previous and next. The lesson leaves a concept on evidence, and a button that
-          walks past one the student has not shown is a button that undoes the thing the
-          whole progression exists to do.
-        -->
-      </section>
-
-      <section class="card standing">
-        <header class="tight">
-          <h3>What you have shown</h3>
-        </header>
-        <lumen-concept-progress [progress]="standing() ?? []" [loading]="loadingStanding()" />
-      </section>
-    </aside>
+    <lumen-lesson-sidebar
+      [lessonTitle]="session.lessonTitle() || course()!.lessonTitle || ''"
+      [courseTitle]="course()!.courseTitle"
+      [steps]="steps()"
+      [currentStep]="currentStep()"
+      [shown]="shown()"
+      [position]="position()"
+      [standing]="standing()"
+      [loadingStanding]="loadingStanding()" />
 
     <!-- ---------------- the room ---------------- -->
     <div class="room">

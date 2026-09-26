@@ -3,7 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { ConceptProgress, SessionStarted, StudyNoteView, TurnTaken, throughPlan } from 'domain';
 import { BargeInDetector, SpeechOutput, TutorSession } from 'tutor-voice';
 import { LumenApi } from '../api/lumen-api';
-import { ConceptProgressPanel } from '../progress/concept-progress';
+import { LessonSidebar, PlanStep } from '../layouts/lesson-sidebar';
 import { TutorCanvas } from './tutor-canvas';
 import { OrbMode, VoiceOrb } from './voice-orb';
 
@@ -51,7 +51,7 @@ type Recognition = {
 
 @Component({
   selector: 'lumen-tutor',
-  imports: [FormsModule, VoiceOrb, TutorCanvas, ConceptProgressPanel],
+  imports: [FormsModule, VoiceOrb, TutorCanvas, LessonSidebar],
   templateUrl: './tutor.html',
   styleUrl: './tutor.scss',
 })
@@ -123,7 +123,7 @@ export class Tutor implements OnDestroy {
    * The sidebar is a map of where the lesson is, and a student does not think in lessons and
    * concepts as two levels — they think in "what have we done, what is next".
    */
-  readonly steps = computed(() =>
+  readonly steps = computed<readonly PlanStep[]>(() =>
     (this.course()?.lessons ?? []).flatMap((lesson) =>
       lesson.concepts.map((concept) => ({ lesson: lesson.title, concept })),
     ),

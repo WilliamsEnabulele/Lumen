@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { AppShell } from './layouts/app-shell';
 import { Library } from './library/library';
 import { Tutor } from './tutor/tutor';
 import { Upload } from './upload/upload';
@@ -11,10 +12,19 @@ import { Upload } from './upload/upload';
  * back to needs an address, or coming back means uploading it again.
  */
 export const routes: Routes = [
-  { path: '', pathMatch: 'full', redirectTo: 'library' },
-  { path: 'library', component: Library, title: 'Your courses — Lumen' },
-  { path: 'new', component: Upload, title: 'New lesson — Lumen' },
-  // The course id binds straight to the Tutor's required input, via withComponentInputBinding.
-  { path: 'lesson/:courseId', component: Tutor, title: 'Lesson — Lumen' },
-  { path: '**', redirectTo: 'library' },
+  {
+    // Every page is a child of the shell rather than a sibling of the bar. A page cannot then
+    // be routed to without its chrome, which is the kind of thing that only shows up later,
+    // on the one route somebody added in a hurry.
+    path: '',
+    component: AppShell,
+    children: [
+      { path: '', pathMatch: 'full', redirectTo: 'library' },
+      { path: 'library', component: Library, title: 'Your courses — Lumen' },
+      { path: 'new', component: Upload, title: 'New lesson — Lumen' },
+      // The course id binds straight to the Tutor's required input, via withComponentInputBinding.
+      { path: 'lesson/:courseId', component: Tutor, title: 'Lesson — Lumen' },
+      { path: '**', redirectTo: 'library' },
+    ],
+  },
 ];
