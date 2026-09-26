@@ -137,9 +137,18 @@ export class VoiceOrb implements AfterViewInit, OnDestroy {
     }
   }
 
+  /**
+   * Which colour the orb is, which is the only thing on screen saying whose turn it is.
+   *
+   * Listening is the live colour — the microphone is open and the student is being heard —
+   * and everything else is the accent the tutor speaks and draws in. That pairing replaced a
+   * tutor colour and a student colour that meant the same thing, and it has to stay two
+   * values: an orb that is one colour in both states is an orb that has stopped answering the
+   * question it is there to answer.
+   */
   private colour(mode: OrbMode): string {
     const styles = getComputedStyle(this.surface().nativeElement);
-    const token = mode === 'listening' ? '--student' : '--tutor';
-    return styles.getPropertyValue(token).trim() || '#b06d22';
+    const token = mode === 'listening' ? '--success' : '--primary';
+    return styles.getPropertyValue(token).trim() || '#4f46e5';
   }
 }

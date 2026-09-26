@@ -1,57 +1,87 @@
 /* Tokens. Light is the base; dark redefines only the values. */
 :root {
-  --ground: #f5f7f9;
+  --background: #f6f7f9;
   --surface: #ffffff;
-  --surface-2: #eef1f5;
-  --ink: #1a2028;
-  --ink-muted: #5c6874;
-  --ink-faint: #8b97a4;
-  --border: #dde3e9;
-  --border-strong: #c3cdd7;
+  --muted: #f1f5f9;
 
-  /* Two voices, two colours — the distinction is semantic, not decorative. */
-  --tutor: #b06d22;
-  --tutor-bg: #fbf1e4;
-  --student: #23807f;
-  --student-bg: #e2f1f0;
-  --critical: #bf423a;
+  /* Three weights of text, because a caption, a label and a sentence are not the same voice. */
+  --foreground: #0f172a;
+  --muted-foreground: #64748b;
+  --subtle-foreground: #94a3b8;
 
-  --sans: 'IBM Plex Sans', ui-sans-serif, system-ui, sans-serif;
-  --mono: 'IBM Plex Mono', ui-monospace, 'SF Mono', Menlo, monospace;
-  --serif: 'IBM Plex Serif', Georgia, serif;
+  --border: #e2e8f0;
+  --border-strong: #cbd5e1;
+
+  /* One accent, used for anything the student can act on and for the tutor's own marks on the
+     canvas. It replaced a pair — a colour for the tutor and a colour for the student — which
+     read well on a page with one of each and stopped scaling the moment a screen had a tutor
+     status, a student control and a piece of tutor-drawn material on it at once. */
+  --primary: #4f46e5;
+  --primary-foreground: #ffffff;
+  --secondary: #eef2ff;
+  --secondary-foreground: #4338ca;
+
+  /* Reserved for live state: the tutor is speaking, the transcript is running, the microphone
+     is open. Never decorative, because a green dot that sometimes means nothing is a green dot
+     nobody reads. */
+  --success: #16a34a;
+  --success-bg: #dcfce7;
+
+  --critical: #dc2626;
+  --critical-bg: #fee2e2;
+
+  --sans: 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', monospace;
+
+  --radius: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
 }
 
 @media (prefers-color-scheme: dark) {
-  :root {
-    --ground: #14181d;
-    --surface: #1c2229;
-    --surface-2: #232b33;
-    --ink: #e4e9ef;
-    --ink-muted: #94a1af;
-    --ink-faint: #6d7a88;
-    --border: #2b333c;
-    --border-strong: #3c4650;
-    --tutor: #e0a05a;
-    --tutor-bg: #2e2419;
-    --student: #4fb5b3;
-    --student-bg: #16302f;
-    --critical: #e2716a;
+  :root:not([data-theme='light']) {
+    --background: #0b1120;
+    --surface: #141c2b;
+    --muted: #1e293b;
+    --foreground: #e8edf5;
+    --muted-foreground: #94a3b8;
+    --subtle-foreground: #64748b;
+    --border: #24304a;
+    --border-strong: #35435f;
+    --primary: #818cf8;
+    --primary-foreground: #0b1120;
+    --secondary: #1e2148;
+    --secondary-foreground: #c7d2fe;
+    --success: #4ade80;
+    --success-bg: #10331f;
+    --critical: #f87171;
+    --critical-bg: #3a1a1a;
   }
 }
 
 * { box-sizing: border-box; }
 
 html, body {
-  /* The tutor view is a room, not a document: it fills the viewport and its footer sits at
-     the bottom. Without an explicit height the flex column collapses to its content and
-     leaves a dead band under the fold. */
+  /* The lesson is a room, not a document: it fills the viewport and its footer sits at the
+     bottom. Without an explicit height the flex column collapses to its content and leaves a
+     dead band under the fold. */
   height: 100%;
   margin: 0;
-  background: var(--ground);
-  color: var(--ink);
+  background: var(--background);
+  color: var(--foreground);
   font-family: var(--sans);
-  font-size: 15px;
+  font-size: 14px;
   line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* One heading treatment, applied by the components that want it. Inter tightened rather than
+   a second face: a display serif next to a dense tool reads as two products. */
+%heading, .heading {
+  font-weight: 600;
+  letter-spacing: -0.025em;
+  line-height: 1.25;
+  text-wrap: balance;
 }
 
 button {
@@ -59,27 +89,31 @@ button {
   font-size: 13.5px;
   font-weight: 500;
   padding: 8px 14px;
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   cursor: pointer;
-  border: 1px solid var(--border-strong);
+  border: 1px solid var(--border);
   background: var(--surface);
-  color: var(--ink);
+  color: var(--foreground);
 
-  &:hover:not(:disabled) { border-color: var(--ink-faint); }
-  &:disabled { opacity: 0.4; cursor: not-allowed; }
-  &:focus-visible { outline: 2px solid var(--student); outline-offset: 2px; }
+  &:hover:not(:disabled) { border-color: var(--border-strong); }
+  &:disabled { opacity: 0.5; cursor: not-allowed; }
+  &:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
 
   &.primary {
-    background: var(--ink);
-    color: var(--ground);
-    border-color: var(--ink);
+    background: var(--primary);
+    color: var(--primary-foreground);
+    border-color: var(--primary);
   }
 }
 
-input:focus-visible { outline: 2px solid var(--student); outline-offset: 1px; }
+input:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 1px;
+}
 
-/* A percentage min-height cannot resolve against an auto-height parent, so the chain from
-   body down to the tutor view is flex instead: each link grows to fill the one above it. */
+/* A percentage min-height cannot resolve against an auto-height parent, so the chain from body
+   down to the lesson view is flex instead: each link grows to fill the one above it. */
 body {
   display: flex;
   flex-direction: column;

@@ -59,7 +59,7 @@ import { Upload } from './upload/upload';
       */
       .waking {
         margin: auto;
-        color: var(--ink-faint);
+        color: var(--subtle-foreground);
         font-size: 14px;
         opacity: 0;
         animation: waking-surfaces 0.25s ease 600ms forwards;
@@ -85,7 +85,7 @@ import { Upload } from './upload/upload';
 
       .who {
         font-size: 13px;
-        color: var(--ink-faint);
+        color: var(--subtle-foreground);
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
@@ -94,12 +94,12 @@ import { Upload } from './upload/upload';
       .ghost {
         border: 0;
         background: none;
-        color: var(--ink-muted);
+        color: var(--muted-foreground);
         font-size: 13px;
         padding: 4px 6px;
       }
       .ghost:hover {
-        color: var(--ink);
+        color: var(--foreground);
       }
     `,
   ],

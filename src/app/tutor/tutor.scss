@@ -10,13 +10,13 @@
   padding: 48px 16px;
 
   h2 {
-    font-family: var(--serif);
-    font-weight: 400;
+    font-family: var(--sans);
+    font-weight: 600;
     font-size: 22px;
     margin: 0 0 8px;
   }
 }
-.quiet { color: var(--ink-muted); margin: 0; }
+.quiet { color: var(--muted-foreground); margin: 0; }
 .small { font-size: 13px; }
 
 /* ---- bar ---- */
@@ -35,14 +35,14 @@
     font-size: 10.5px;
     letter-spacing: 0.14em;
     text-transform: uppercase;
-    color: var(--ink-faint);
+    color: var(--subtle-foreground);
     margin-bottom: 4px;
   }
 
   h1 {
-    font-family: var(--serif);
+    font-family: var(--sans);
     font-size: 19px;
-    font-weight: 400;
+    font-weight: 600;
     margin: 0;
     letter-spacing: -0.005em;
   }
@@ -83,7 +83,7 @@
   font-family: var(--mono);
   font-size: 11px;
   letter-spacing: 0.06em;
-  color: var(--ink-faint);
+  color: var(--subtle-foreground);
   margin: 0;
   text-align: center;
   max-width: 18ch;
@@ -96,16 +96,16 @@
   max-width: 44ch;
 
   h2 {
-    font-family: var(--serif);
+    font-family: var(--sans);
     font-size: 28px;
-    font-weight: 400;
+    font-weight: 600;
     letter-spacing: -0.015em;
     margin: 0 0 12px;
     text-wrap: balance;
   }
 
   p {
-    color: var(--ink-muted);
+    color: var(--muted-foreground);
     line-height: 1.6;
     margin: 0 0 22px;
     text-wrap: pretty;
@@ -118,14 +118,14 @@
   margin: 24px 0 0;
   font-family: var(--mono);
   font-size: 12px;
-  color: var(--ink-faint);
+  color: var(--subtle-foreground);
 }
 
 .concept {
   font-family: var(--mono);
   font-size: 11px;
   letter-spacing: 0.06em;
-  color: var(--ink-faint);
+  color: var(--subtle-foreground);
   align-self: center;
 }
 
@@ -133,7 +133,7 @@
   margin: 18px 0 0;
   font-family: var(--mono);
   font-size: 11px;
-  color: var(--ink-faint);
+  color: var(--subtle-foreground);
 }
 
 /* ---- caption + ask ---- */
@@ -150,14 +150,13 @@
 .said {
   flex: 1 1 320px;
   margin: 0;
-  font-family: var(--serif);
-  font-size: 15px;
-  line-height: 1.5;
+  font-size: 14.5px;
+  line-height: 1.55;
   max-height: 3em;
   overflow: hidden;
 
-  .spoken { color: var(--ink); }
-  .ahead { color: var(--ink-faint); }
+  .spoken { color: var(--foreground); }
+  .ahead { color: var(--subtle-foreground); }
 }
 
 .ask {
@@ -173,8 +172,8 @@
     padding: 8px 12px;
     border: 1px solid var(--border-strong);
     border-radius: 8px;
-    background: var(--ground);
-    color: var(--ink);
+    background: var(--background);
+    color: var(--foreground);
   }
 }
 
@@ -192,7 +191,7 @@
   gap: 0.6rem;
   margin: 0.75rem 0 0;
   font-size: 0.9rem;
-  color: var(--ink-muted);
+  color: var(--muted-foreground);
 
   .badge {
     flex: none;
@@ -202,8 +201,8 @@
     font-weight: 600;
     letter-spacing: 0.04em;
     text-transform: uppercase;
-    background: color-mix(in oklab, var(--ink-muted) 18%, transparent);
-    color: var(--ink);
+    background: color-mix(in oklab, var(--muted-foreground) 18%, transparent);
+    color: var(--foreground);
   }
 
   &.verdict-correct .badge { background: color-mix(in oklab, #2f9e63 26%, transparent); }
@@ -216,7 +215,7 @@
   margin: 0.4rem 0 0;
   font-size: 0.85rem;
   font-style: italic;
-  color: var(--ink-muted);
+  color: var(--muted-foreground);
 }
 
 /* The progress report, opened from the bar. A panel rather than a page: it is a thing to
@@ -225,7 +224,7 @@
   flex: none;
   padding: 20px 24px;
   border-bottom: 1px solid var(--border);
-  background: var(--ground);
+  background: var(--background);
   max-height: 46vh;
   overflow-y: auto;
 }

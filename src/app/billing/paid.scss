@@ -11,20 +11,20 @@
 
 h2 {
   margin: 0;
-  font-family: var(--serif);
-  font-weight: 400;
+  font-family: var(--sans);
+  font-weight: 600;
   font-size: 26px;
   line-height: 1.2;
   text-wrap: balance;
 }
 
-.lede { margin: 0; color: var(--ink-muted); line-height: 1.55; }
-.quiet { margin: 0; font-size: 14px; color: var(--ink-faint); line-height: 1.55; }
+.lede { margin: 0; color: var(--muted-foreground); line-height: 1.55; }
+.quiet { margin: 0; font-size: 14px; color: var(--subtle-foreground); line-height: 1.55; }
 
 code {
   font-family: var(--mono);
   font-size: 12.5px;
-  background: var(--surface-2);
+  background: var(--muted);
   padding: 2px 6px;
   border-radius: 4px;
 }
@@ -35,7 +35,7 @@ code {
   width: 44px;
   height: 44px;
   border-radius: 50%;
-  background: color-mix(in oklab, var(--student) 22%, transparent);
+  background: color-mix(in oklab, var(--primary) 22%, transparent);
   position: relative;
 }
 .tick::after {
@@ -45,7 +45,7 @@ code {
   top: 10px;
   width: 11px;
   height: 20px;
-  border: solid var(--student);
+  border: solid var(--primary);
   border-width: 0 2px 2px 0;
   transform: rotate(45deg);
 }
@@ -57,7 +57,7 @@ code {
   width: 7px;
   height: 7px;
   border-radius: 50%;
-  background: var(--tutor);
+  background: var(--primary);
   animation: bob 1.1s ease-in-out infinite;
 }
 .waiting span:nth-child(2) { animation-delay: 0.14s; }
@@ -78,9 +78,9 @@ button {
   padding: 11px 20px;
   border-radius: 6px;
   cursor: pointer;
-  border: 1px solid var(--ink);
-  background: var(--ink);
-  color: var(--ground);
+  border: 1px solid var(--foreground);
+  background: var(--foreground);
+  color: var(--background);
   font-weight: 500;
   margin-top: 6px;
 }
