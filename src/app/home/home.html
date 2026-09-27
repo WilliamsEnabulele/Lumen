@@ -1,0 +1,157 @@
+<section class="page">
+  <header>
+    <h1>{{ greeting }}, {{ name }}</h1>
+    <p class="lede">Pick up where you left off, or hand over something new.</p>
+  </header>
+
+  <!-- ---------------- keep going ---------------- -->
+  <section class="card resume">
+    <p class="eyebrow">Keep going</p>
+
+    @if (open() === null) {
+      <p class="quiet">Looking for where you got to…</p>
+    } @else if (resume(); as lesson) {
+      <h2>{{ lesson.courseTitle }}</h2>
+      <p class="where">
+        @if (lesson.conceptTitle) {
+          {{ lesson.conceptTitle }} ·
+        }
+        {{ lesson.conceptsBehind }} of {{ lesson.conceptsTotal }} concepts behind you
+      </p>
+
+      <div class="track"><div class="fill" [style.width.%]="resumePosition()"></div></div>
+
+      <div class="row">
+        <a class="go" [routerLink]="['/lesson', lesson.courseId]">Carry on</a>
+        @if (lastTaught(lesson); as when) {
+          <span class="when">Last taught {{ when }}</span>
+        }
+      </div>
+
+      @if (open()!.length > 1) {
+        <p class="more">
+          {{ open()!.length - 1 }} other {{ open()!.length === 2 ? 'lesson' : 'lessons' }} part-way
+          through — <a routerLink="/library">see the library</a>
+        </p>
+      }
+    } @else {
+      <p class="quiet">
+        Nothing part-way through. Hand over a document and the tutor will work out what it
+        teaches.
+      </p>
+      <a class="go" routerLink="/new">Hand over a document</a>
+    }
+  </section>
+
+  <div class="pair">
+    <!-- ---------------- hand over something new ---------------- -->
+    <section class="card">
+      <p class="eyebrow">Something new</p>
+      <h3>Hand over a document</h3>
+      <p class="quiet">
+        A chapter, a set of notes or a deck. Lumen reads it, works out what it teaches, then
+        teaches it to you out loud.
+      </p>
+
+      <a class="go" routerLink="/new">Choose a document</a>
+
+      @if (entitlement(); as allowance) {
+        @if (allowance.enforced && !allowance.active) {
+          <p class="allowance">
+            @if (allowance.freeUploadsLeft > 0) {
+              {{ allowance.freeUploadsLeft }} free
+              {{ allowance.freeUploadsLeft === 1 ? 'document' : 'documents' }} left this month.
+            } @else {
+              This month's free document is spent.
+            }
+          </p>
+        }
+      }
+    </section>
+
+    <!-- ---------------- this week ---------------- -->
+    <section class="card">
+      <p class="eyebrow">This week</p>
+
+      @if (streak(); as run) {
+        <h3>
+          @if (run.current > 0) {
+            {{ run.current }} {{ run.current === 1 ? 'day' : 'days' }} in a row
+          } @else {
+            Not started yet
+          }
+        </h3>
+
+        <div class="week">
+          @for (day of week(); track day.iso) {
+            <span
+              class="day"
+              [class.taught]="day.taught"
+              [class.today]="day.today"
+              [class.ahead]="day.ahead"
+              [attr.title]="day.iso">
+              {{ day.letter }}
+            </span>
+          }
+        </div>
+
+        <p class="quiet">
+          {{ run.thisWeek }} of {{ run.goal }} days so far.
+          @if (run.goalMet) {
+            That is the week.
+          } @else if (run.longest > run.current) {
+            Your longest run is {{ run.longest }}.
+          }
+        </p>
+        <!-- Days, never concepts. This counts whether you turned up, not what you know. -->
+        <p class="tiny">Counts days you did some work, not how well it went.</p>
+      } @else {
+        <p class="quiet">Nothing counted yet.</p>
+      }
+    </section>
+  </div>
+
+  <!-- ---------------- what you have shown ---------------- -->
+  <section class="card">
+    <p class="eyebrow">What you have shown</p>
+
+    @if (shown() === null) {
+      <p class="quiet">Fetching…</p>
+    } @else if (shown()!.length === 0) {
+      <p class="quiet">
+        Nothing yet. This fills in as you answer — it is built from your answers, not from how
+        much of a lesson has gone by.
+      </p>
+    } @else {
+      <h3>
+        {{ mastered().length }} of {{ shown()!.length }}
+        {{ shown()!.length === 1 ? 'concept' : 'concepts' }} shown
+      </h3>
+
+      <ul class="concepts">
+        @for (concept of shown()!; track concept.concept + concept.courseId) {
+          <li [class.is-shown]="concept.mastered" [class.is-flagged]="concept.movedOnUnmastered">
+            <span class="what">{{ concept.concept }}</span>
+            <span class="state">
+              @if (concept.movedOnUnmastered) {
+                Moved on without it
+              } @else if (concept.mastered) {
+                Shown
+              } @else if (concept.answers === 0) {
+                Not yet asked
+              } @else {
+                Still working on it
+              }
+            </span>
+          </li>
+        }
+      </ul>
+
+      @if (flagged().length) {
+        <p class="tiny">
+          {{ flagged().length }} worth coming back to — the lesson carried on without them.
+        </p>
+      }
+    }
+  </section>
+</section>

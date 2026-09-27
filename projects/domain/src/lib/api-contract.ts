@@ -159,6 +159,51 @@ export interface KeepNote {
   readonly sourceRef?: string | null;
 }
 
+/**
+ * A lesson left part-way through.
+ *
+ * Position is counted the same way the lesson view counts it — concepts behind the open one —
+ * so the home screen and the lesson cannot disagree about how far through somebody is.
+ */
+export interface OpenLessonView {
+  readonly sessionId: string;
+  readonly courseId: string;
+  readonly courseTitle: string;
+  readonly conceptTitle: string | null;
+  readonly conceptsBehind: number;
+  readonly conceptsTotal: number;
+  readonly lastTaughtAt: string;
+}
+
+/** One concept the server believes something about, summarised across every course. */
+export interface ShownConceptView {
+  readonly concept: string;
+  readonly courseId: string;
+  readonly belief: number;
+  readonly mastered: boolean;
+  readonly reteaches: number;
+  readonly movedOnUnmastered: boolean;
+  /** How many answers the belief was built from. The trail itself stays on the lesson view. */
+  readonly answers: number;
+}
+
+/**
+ * Turning up, counted.
+ *
+ * The one figure in this product rendered as a figure, and only because of what it measures:
+ * attendance is a plain fact about a day, where a belief about what somebody knows is an
+ * estimate they can argue with. `days` are ISO dates, for drawing the week rather than
+ * describing it.
+ */
+export interface StreakView {
+  readonly current: number;
+  readonly longest: number;
+  readonly thisWeek: number;
+  readonly goal: number;
+  readonly goalMet: boolean;
+  readonly days: readonly string[];
+}
+
 /** Who is signed in, as the server describes them. */
 export interface SignedInStudent {
   readonly id: string;

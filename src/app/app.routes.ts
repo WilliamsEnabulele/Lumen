@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { AppShell } from './layouts/app-shell';
+import { Home } from './home/home';
 import { Library } from './library/library';
 import { Settings } from './settings/settings';
 import { Tutor } from './tutor/tutor';
@@ -20,13 +21,13 @@ export const routes: Routes = [
     path: '',
     component: AppShell,
     children: [
-      { path: '', pathMatch: 'full', redirectTo: 'library' },
+      { path: '', pathMatch: 'full', component: Home, title: 'Lumen' },
       { path: 'library', component: Library, title: 'Your courses — Lumen' },
       { path: 'new', component: Upload, title: 'New lesson — Lumen' },
       // The course id binds straight to the Tutor's required input, via withComponentInputBinding.
       { path: 'lesson/:courseId', component: Tutor, title: 'Lesson — Lumen' },
       { path: 'settings', component: Settings, title: 'Settings — Lumen' },
-      { path: '**', redirectTo: 'library' },
+      { path: '**', redirectTo: '' },
     ],
   },
 ];

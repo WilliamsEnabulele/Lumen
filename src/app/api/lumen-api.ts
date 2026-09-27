@@ -5,6 +5,9 @@ import {
   CourseSummaryView,
   EntitlementView,
   KeepNote,
+  OpenLessonView,
+  ShownConceptView,
+  StreakView,
   StudyNoteView,
   IngestionStatus,
   PaymentView,
@@ -52,6 +55,24 @@ export class LumenApi {
     return this.http
       .post<TurnTaken>(`${this.base}/sessions/${sessionId}/turn`, { said })
       .pipe(catchError(readableFailure));
+  }
+
+  /** Lessons left part-way through, newest first. What "pick up where you left off" asks. */
+  openLessons(): Observable<readonly OpenLessonView[]> {
+    return this.http
+      .get<readonly OpenLessonView[]>(`${this.base}/sessions`)
+      .pipe(catchError(readableFailure));
+  }
+
+  /** What the server believes this student knows, across every course rather than within one. */
+  shown(): Observable<readonly ShownConceptView[]> {
+    return this.http
+      .get<readonly ShownConceptView[]>(`${this.base}/progress`)
+      .pipe(catchError(readableFailure));
+  }
+
+  streak(): Observable<StreakView> {
+    return this.http.get<StreakView>(`${this.base}/streak`).pipe(catchError(readableFailure));
   }
 
   /** Every course this student has made. The library, and nobody else's. */
