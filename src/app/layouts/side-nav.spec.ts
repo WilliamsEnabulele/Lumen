@@ -4,16 +4,16 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { bearer } from '../auth/bearer';
 import { AUTH_PATH, Session } from '../auth/session';
-import { TopBar } from './top-bar';
+import { SideNav } from './side-nav';
 
-describe('TopBar', () => {
+describe('SideNav', () => {
   let http: HttpTestingController;
   let session: Session;
-  let fixture: ComponentFixture<TopBar>;
+  let fixture: ComponentFixture<SideNav>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [TopBar],
+      imports: [SideNav],
       providers: [
         provideHttpClient(withInterceptors([bearer])),
         provideHttpClientTesting(),
@@ -33,7 +33,7 @@ describe('TopBar', () => {
       name: 'Adaeze Okoro',
     });
 
-    fixture = TestBed.createComponent(TopBar);
+    fixture = TestBed.createComponent(SideNav);
     fixture.detectChanges();
   });
 
@@ -59,7 +59,7 @@ describe('TopBar', () => {
     expect(fixture.componentInstance.initial).toBe('N');
   });
 
-  it('signs out from here, since this is the only place it is offered', () => {
+  it('signs out from here, which is one of the two places it is offered', () => {
     fixture.componentInstance.signOut();
     http.expectOne(`${AUTH_PATH}/logout`).flush({ signedOut: true });
 

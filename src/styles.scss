@@ -38,25 +38,41 @@
   --radius-lg: 12px;
 }
 
+/* The dark palette, written once. It has to be stated in two places — the media query for
+   somebody who never chose, and the attribute for somebody who did — and two copies of
+   sixteen hex values is two copies that drift. */
+@mixin dark-palette {
+  color-scheme: dark;
+
+  --background: #0b1120;
+  --surface: #141c2b;
+  --muted: #1e293b;
+  --foreground: #e8edf5;
+  --muted-foreground: #94a3b8;
+  --subtle-foreground: #64748b;
+  --border: #24304a;
+  --border-strong: #35435f;
+  --primary: #818cf8;
+  --primary-foreground: #0b1120;
+  --secondary: #1e2148;
+  --secondary-foreground: #c7d2fe;
+  --success: #4ade80;
+  --success-bg: #10331f;
+  --critical: #f87171;
+  --critical-bg: #3a1a1a;
+}
+
+/* Nobody chose, and the machine is dark. Guarded, so an explicit light choice still wins. */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme='light']) {
-    --background: #0b1120;
-    --surface: #141c2b;
-    --muted: #1e293b;
-    --foreground: #e8edf5;
-    --muted-foreground: #94a3b8;
-    --subtle-foreground: #64748b;
-    --border: #24304a;
-    --border-strong: #35435f;
-    --primary: #818cf8;
-    --primary-foreground: #0b1120;
-    --secondary: #1e2148;
-    --secondary-foreground: #c7d2fe;
-    --success: #4ade80;
-    --success-bg: #10331f;
-    --critical: #f87171;
-    --critical-bg: #3a1a1a;
+    @include dark-palette;
   }
+}
+
+/* Somebody chose dark. This wins over a light operating system, which is the direction a
+   palette declared only inside the media query never covers. */
+:root[data-theme='dark'] {
+  @include dark-palette;
 }
 
 * { box-sizing: border-box; }

@@ -1,0 +1,48 @@
+<section class="page">
+  <header>
+    <h1>Settings</h1>
+  </header>
+
+  <section class="card">
+    <h2>Appearance</h2>
+    <p class="lede">
+      Kept on this device rather than on your account. Reading in bed on a phone and at a desk
+      in daylight want different answers, and a setting that followed you between them would be
+      wrong on one.
+    </p>
+
+    <div class="choices" role="radiogroup" aria-label="Appearance">
+      @for (choice of choices; track choice.value) {
+        <button
+          type="button"
+          role="radio"
+          [attr.aria-checked]="theme.preference() === choice.value"
+          [class.on]="theme.preference() === choice.value"
+          (click)="theme.set(choice.value)">
+          <span class="label">{{ choice.label }}</span>
+          <span class="detail">{{ choice.detail }}</span>
+        </button>
+      }
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Account</h2>
+
+    <dl>
+      <div>
+        <dt>Name</dt>
+        <dd>{{ session.student()?.name || '—' }}</dd>
+      </div>
+      <div>
+        <dt>Email</dt>
+        <dd>{{ session.student()?.email }}</dd>
+      </div>
+    </dl>
+
+    <button type="button" class="leave" (click)="signOut()">Sign out</button>
+    <p class="tiny">
+      Signs out this device only. Signing out on a laptop should not sign you out of your phone.
+    </p>
+  </section>
+</section>

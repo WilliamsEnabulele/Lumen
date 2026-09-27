@@ -49,7 +49,8 @@ question, and then picks up exactly where it left off.
 | `projects/domain` | The rules the client and server both hold: the resume pointer, where an interrupted utterance re-enters, the session state machine, the register ladder |
 | `projects/tutor-voice` | The client half of the tutor: the microphone gate that decides to stop, speech output that knows where it got to, and the session that holds the pointer |
 | `src/app/auth` | The door: the in-memory access token, the interceptor that attaches and refreshes it, and the screen in front of both |
-| `src/app/layouts` | The chrome: the shell every page is routed inside, the top bar, and the lesson sidebar |
+| `src/app/layouts` | The chrome: the shell every page is routed inside, the menu down the side, and the lesson plan beside the canvas |
+| `src/app/settings` | The settings there actually are: appearance, kept on the device, and the account |
 | `src/app/library` | Every course you have made, so finishing a lesson is not the same as losing it |
 | `src/app/upload` | Hand over a document and watch it become a lesson |
 | `src/app/tutor` | Being taught: the voice orb, the animated concept canvas, captions, and interrupting |

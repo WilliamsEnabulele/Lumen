@@ -371,8 +371,9 @@
   }
 }
 
-/* The sidebar stops being a sidebar before it stops being readable. */
-@media (max-width: 900px) {
+/* Below this the plan stops being a column beside the lesson and becomes a band under it,
+   which is the last width at which both are still readable side by side. */
+@media (max-width: 1100px) {
   .studio { flex-direction: column; padding-inline: 12px; }
   .room { width: 100%; }
 }

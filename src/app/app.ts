@@ -3,6 +3,7 @@ import { Router, RouterOutlet } from '@angular/router';
 import { Paid } from './billing/paid';
 import { SignIn } from './auth/sign-in';
 import { Session } from './auth/session';
+import { Theme } from './settings/theme';
 
 /**
  * What is in front of the router, and why anything is.
@@ -68,6 +69,10 @@ import { Session } from './auth/session';
 export class App {
   readonly session = inject(Session);
   private readonly router = inject(Router);
+
+  // Resolved at boot rather than when the settings page is first opened, or a student who
+  // asked for dark gets one light frame on every load.
+  private readonly theme = inject(Theme);
 
   /**
    * Set when this load is a return from the payment provider.

@@ -19,17 +19,6 @@
   </div>
 } @else {
   <div class="studio">
-    <!-- ---------------- the plan ---------------- -->
-    <lumen-lesson-sidebar
-      [lessonTitle]="session.lessonTitle() || course()!.lessonTitle || ''"
-      [courseTitle]="course()!.courseTitle"
-      [steps]="steps()"
-      [currentStep]="currentStep()"
-      [shown]="shown()"
-      [position]="position()"
-      [standing]="standing()"
-      [loadingStanding]="loadingStanding()" />
-
     <!-- ---------------- the room ---------------- -->
     <div class="room">
       <section class="card tutor-bar">
@@ -242,5 +231,16 @@
         </div>
       </section>
     </div>
+
+    <!-- ---------------- the plan, beside it ---------------- -->
+    <lumen-lesson-sidebar
+      [lessonTitle]="session.lessonTitle() || course()!.lessonTitle || ''"
+      [courseTitle]="course()!.courseTitle"
+      [steps]="steps()"
+      [currentStep]="currentStep()"
+      [shown]="shown()"
+      [position]="position()"
+      [standing]="standing()"
+      [loadingStanding]="loadingStanding()" />
   </div>
 }

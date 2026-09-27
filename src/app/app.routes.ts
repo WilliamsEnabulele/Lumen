@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 import { AppShell } from './layouts/app-shell';
 import { Library } from './library/library';
+import { Settings } from './settings/settings';
 import { Tutor } from './tutor/tutor';
 import { Upload } from './upload/upload';
 
@@ -24,6 +25,7 @@ export const routes: Routes = [
       { path: 'new', component: Upload, title: 'New lesson — Lumen' },
       // The course id binds straight to the Tutor's required input, via withComponentInputBinding.
       { path: 'lesson/:courseId', component: Tutor, title: 'Lesson — Lumen' },
+      { path: 'settings', component: Settings, title: 'Settings — Lumen' },
       { path: '**', redirectTo: 'library' },
     ],
   },

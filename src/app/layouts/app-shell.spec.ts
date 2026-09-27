@@ -23,9 +23,9 @@ describe('AppShell', () => {
     const fixture = TestBed.createComponent(AppShell);
     fixture.detectChanges();
 
-    // Every page is a child of this, so a page cannot be routed to without its bar — the kind
+    // Every page is a child of this, so a page cannot be routed to without its menu — the kind
     // of thing that otherwise shows up on the one route somebody added in a hurry.
-    expect(fixture.nativeElement.querySelector('lumen-top-bar')).toBeTruthy();
+    expect(fixture.nativeElement.querySelector('lumen-side-nav')).toBeTruthy();
     expect(fixture.nativeElement.querySelector('router-outlet')).toBeTruthy();
   });
 });

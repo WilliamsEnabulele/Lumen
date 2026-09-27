@@ -1,0 +1,152 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  width: 216px;
+  flex-shrink: 0;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  padding: 14px 10px;
+  gap: 18px;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 4px 8px;
+}
+
+.glyph {
+  width: 24px;
+  height: 24px;
+  border-radius: var(--radius-md);
+  background: var(--primary);
+  position: relative;
+  flex-shrink: 0;
+
+  /* The orb, small: the thing that speaks. */
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 7px;
+    border-radius: 50%;
+    background: var(--primary-foreground);
+    opacity: 0.9;
+  }
+}
+
+.name {
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  font-size: 15px;
+}
+
+nav {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+
+  a {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 10px;
+    border-radius: var(--radius-md);
+    font-size: 13.5px;
+    font-weight: 500;
+    color: var(--muted-foreground);
+    text-decoration: none;
+    cursor: pointer;
+
+    &:hover { background: var(--muted); color: var(--foreground); }
+    &:focus-visible { outline: 2px solid var(--primary); outline-offset: -2px; }
+
+    &.here {
+      background: var(--secondary);
+      color: var(--secondary-foreground);
+      font-weight: 600;
+    }
+  }
+
+  svg {
+    width: 17px;
+    height: 17px;
+    flex-shrink: 0;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+}
+
+.account {
+  margin-top: auto;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 4px 9px;
+  padding: 10px 8px 4px;
+  border-top: 1px solid var(--border);
+}
+
+.avatar {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--secondary);
+  color: var(--secondary-foreground);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.who {
+  font-size: 12.5px;
+  color: var(--muted-foreground);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ghost {
+  grid-column: 1 / -1;
+  justify-self: start;
+  border: 0;
+  background: none;
+  color: var(--subtle-foreground);
+  font-size: 12.5px;
+  padding: 2px 0;
+
+  &:hover { color: var(--foreground); }
+}
+
+/* Narrow: the rail lies down across the top rather than eating half the width. */
+@media (max-width: 860px) {
+  :host {
+    width: 100%;
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+    border-right: 0;
+    border-bottom: 1px solid var(--border);
+    padding: 8px 12px;
+  }
+
+  nav { flex-direction: row; }
+  nav a { padding: 6px 9px; }
+
+  .account {
+    margin-top: 0;
+    margin-left: auto;
+    grid-template-columns: auto auto;
+    border-top: 0;
+    padding: 0;
+  }
+
+  .who { display: none; }
+  .ghost { grid-column: auto; }
+}
